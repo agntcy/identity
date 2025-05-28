@@ -1,4 +1,4 @@
-module github.com/agntcy/identity/api/client
+module github.com/agntcy/identity/identity/api/client
 
 go 1.24.1
 

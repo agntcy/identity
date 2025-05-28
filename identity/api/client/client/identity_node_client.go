@@ -10,7 +10,7 @@ import (
 	httptransport "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 
-	"github.com/agntcy/identity/api/client/client/vc_service"
+	"github.com/agntcy/identity/identity/api/client/client/vc_service"
 )
 
 // Default identity node HTTP client.

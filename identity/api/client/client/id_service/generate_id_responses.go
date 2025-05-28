@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
 
-	"github.com/agntcy/identity/api/client/models"
+	"github.com/agntcy/identity/identity/api/client/models"
 )
 
 // GenerateIDReader is a Reader for the GenerateID structure.

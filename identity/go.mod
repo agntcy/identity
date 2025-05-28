@@ -18,7 +18,7 @@ require (
 )
 
 require (
-	github.com/agntcy/identity/api/client v0.0.0-unpublished
+	github.com/agntcy/identity/identity/api/client v0.0.1
 	github.com/coocood/freecache v1.2.4
 	github.com/eko/gocache/store/freecache/v4 v4.2.2
 	github.com/go-openapi/runtime v0.28.0
@@ -117,4 +117,4 @@ require (
 )
 
 // TODO: replace this when we release everything
-replace github.com/agntcy/identity/api/client v0.0.0-unpublished => ./api/client
+replace github.com/agntcy/identity/identity/api/client v0.0.1 => ./api/client

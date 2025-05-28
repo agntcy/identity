@@ -15,7 +15,7 @@ import (
 	cr "github.com/go-openapi/runtime/client"
 	"github.com/go-openapi/strfmt"
 
-	"github.com/agntcy/identity/api/client/models"
+	"github.com/agntcy/identity/identity/api/client/models"
 )
 
 // NewRegisterIssuerParams creates a new RegisterIssuerParams object,

@@ -13,7 +13,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/strfmt"
 
-	"github.com/agntcy/identity/api/client/models"
+	"github.com/agntcy/identity/identity/api/client/models"
 )
 
 // PublishVerifiableCredentialReader is a Reader for the PublishVerifiableCredential structure.
