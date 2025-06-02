@@ -28,7 +28,8 @@
 
 You can also:
 
-- 📦 Check-out and the [Sample Agents and MCP servers](samples/README.md)
+- 📖 See the full [CLI](cmd/issuer/README.md) and [Node](cmd/node/README.md) docs
+- 📦 Check-out the [Sample Agents and MCP servers](samples/README.md)
 - 📘 Explore our full [Documentation](https://spec.identity.agntcy.org) to understand our platform's capabilities
 - 📝 Dive into our [API Specs](https://spec.identity.agntcy.org/protodocs/agntcy/identity/core/v1alpha1/id.proto) for detailed API documentation
 
