@@ -18,7 +18,6 @@ require (
 )
 
 require (
-	github.com/agntcy/identity/api/client v0.0.1
 	github.com/coocood/freecache v1.2.4
 	github.com/eko/gocache/store/freecache/v4 v4.2.2
 	github.com/go-openapi/runtime v0.28.0
@@ -37,6 +36,7 @@ require (
 )
 
 require (
+	github.com/agntcy/identity/api/client v0.0.0-20250602095730-24ce7be06a3a // indirect
 	github.com/asaskevich/govalidator v0.0.0-20230301143203-a9d515a09cc2 // indirect
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
@@ -116,5 +116,3 @@ require (
 	golang.org/x/sys v0.33.0 // indirect
 	golang.org/x/text v0.25.0 // indirect
 )
-
-replace github.com/agntcy/identity/api/client v0.0.1 => ./api/client
