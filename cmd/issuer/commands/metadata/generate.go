@@ -113,11 +113,6 @@ func (cmd *GenerateCommand) Run(ctx context.Context, flags *GenerateFlags) error
 	}
 
 	fmt.Fprintf(os.Stdout, "Generated metadata with ID: %s\n", metadataId)
-	fmt.Fprintf(os.Stdout,
-		"You can now access the VCs as a Well-Known at:  "+
-			"http://localhost:4000/v1alpha1/vc/%s/.well-known/vcs.json\n",
-		metadataId,
-	)
 
 	// Update the cache with the new metadata ID
 	cmd.cache.MetadataId = metadataId
