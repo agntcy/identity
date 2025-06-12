@@ -11,7 +11,7 @@ import (
 
 	vctypes "github.com/agntcy/identity/internal/core/vc/types"
 	"github.com/agntcy/identity/internal/pkg/cmdutil"
-	verifysrv "github.com/agntcy/identity/pkg/vc/verify"
+	vc "github.com/agntcy/identity/pkg/vc/verify"
 
 	"github.com/spf13/cobra"
 )
@@ -26,10 +26,10 @@ type VerifyFlags struct {
 }
 
 type VerifyCommand struct {
-	verifyService verifysrv.VerifyService
+	verifier vc.Verifier
 }
 
-func NewCmd(verifyService verifysrv.VerifyService) *cobra.Command {
+func NewCmd(verifier vc.Verifier) *cobra.Command {
 	flags := NewVerifyFlags()
 
 	cmd := &cobra.Command{
@@ -37,7 +37,7 @@ func NewCmd(verifyService verifysrv.VerifyService) *cobra.Command {
 		Short: "Verify badges from a file",
 		Run: func(cmd *cobra.Command, args []string) {
 			c := VerifyCommand{
-				verifyService: verifyService,
+				verifier: verifier,
 			}
 
 			err := c.Run(cmd.Context(), flags)
@@ -66,7 +66,7 @@ func (f *VerifyFlags) AddFlags(cmd *cobra.Command) {
 func (cmd *VerifyCommand) Run(ctx context.Context, flags *VerifyFlags) error {
 	// if the file path is not set, prompt the user for it interactively
 	if flags.BadgeFilePath == "" {
-		err := cmdutil.ScanRequired("Full file path to the badge file", &flags.BadgeFilePath)
+		err := cmdutil.ScanRequired("Full file path to the badges file", &flags.BadgeFilePath)
 		if err != nil {
 			return fmt.Errorf("error reading file path: %w", err)
 		}
@@ -96,7 +96,7 @@ func (cmd *VerifyCommand) Run(ctx context.Context, flags *VerifyFlags) error {
 			continue
 		}
 
-		verifiedVC, err := cmd.verifyService.VerifyCredential(ctx, envelopedCredential, flags.IdentityNodeURL)
+		verifiedVC, err := cmd.verifier.VerifyCredential(ctx, envelopedCredential, flags.IdentityNodeURL)
 		if err != nil {
 			return err
 		}

@@ -27,7 +27,7 @@ import (
 	vaultfs "github.com/agntcy/identity/internal/issuer/vault/data/filesystem"
 	"github.com/agntcy/identity/internal/pkg/nodeapi"
 	"github.com/agntcy/identity/internal/pkg/oidc"
-	"github.com/agntcy/identity/pkg/vc/verify"
+	vc "github.com/agntcy/identity/pkg/vc/verify"
 
 	"github.com/spf13/cobra"
 )
@@ -84,7 +84,7 @@ The Identity CLI tool is a command line interface for generating, publishing and
 		oidcAuth,
 		nodeClientPrv,
 	)
-	verifyService := verify.NewVerifyService(nodeClientPrv)
+	verifyService := vc.NewVerifier(nodeClientPrv)
 
 	rootCmd.AddCommand(vaultcmd.NewCmd(cache, vaultService))
 	rootCmd.AddCommand(issuercmd.NewCmd(cache, issuerService, vaultService))

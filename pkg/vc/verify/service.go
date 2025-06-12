@@ -1,21 +1,23 @@
 // Copyright 2025 AGNTCY Contributors (https://github.com/agntcy)
 // SPDX-License-Identifier: Apache-2.0
 
-package verify
+package vc
 
 import (
 	"context"
 	"encoding/json"
-	"fmt"
 
+	errtypes "github.com/agntcy/identity/internal/core/errors/types"
 	idtypes "github.com/agntcy/identity/internal/core/id/types"
 	"github.com/agntcy/identity/internal/core/vc/jose"
 	vctypes "github.com/agntcy/identity/internal/core/vc/types"
+	"github.com/agntcy/identity/internal/pkg/errutil"
 	"github.com/agntcy/identity/internal/pkg/nodeapi"
 	"github.com/lestrrat-go/jwx/v3/jws"
 )
 
-type VerifyService interface {
+// Verifier defines the interface for verifying verifiable credentials (badges)
+type Verifier interface {
 	VerifyCredential(
 		ctx context.Context,
 		credential *vctypes.EnvelopedCredential,
@@ -23,61 +25,103 @@ type VerifyService interface {
 	) (*vctypes.VerifiableCredential, error)
 }
 
-type verifyService struct {
+// Verifier implementation that uses a NodeClientProvider to resolve metadata
+type verifier struct {
 	nodeClientPrv nodeapi.ClientProvider
 }
 
-func NewVerifyService(
+// NewVerifier creates a new Verifier instance with the provided NodeClientProvider
+func NewVerifier(
 	nodeClientPrv nodeapi.ClientProvider,
-) VerifyService {
-	return &verifyService{
+) Verifier {
+	return &verifier{
 		nodeClientPrv: nodeClientPrv,
 	}
 }
 
-func (v *verifyService) VerifyCredential(
+// VerifyCredential verifies a verifiable credential (badge) using the Resolver Metadata public key
+// from the identity node, and returns the parsed VerifiableCredential.
+func (v *verifier) VerifyCredential(
 	ctx context.Context,
 	credential *vctypes.EnvelopedCredential,
 	identityNodeURL string,
 ) (*vctypes.VerifiableCredential, error) {
-	nodeClientPrv := nodeapi.NewNodeClientProvider()
-
-	client, err := nodeClientPrv.New(identityNodeURL)
-	if err != nil {
-		return nil, err
+	// Create a new NodeClient using the provided identityNodeURL
+	client, err := v.nodeClientPrv.New(identityNodeURL)
+	if err != nil || client == nil {
+		return nil, errutil.ErrInfo(
+			errtypes.ERROR_REASON_UNSPECIFIED,
+			"Failed to create NodeClient for identity node: "+identityNodeURL,
+			err,
+		)
 	}
 
+	// Ensure the credential is not nil
+	if credential == nil {
+		return nil, errutil.ErrInfo(
+			errtypes.ERROR_REASON_UNSPECIFIED,
+			"credential is nil",
+			nil,
+		)
+	}
+
+	// Based on the EnvelopeType, handle the verification process
+	// Note: Currently, only JOSE envelope type is supported for badge verification
 	switch credential.EnvelopeType {
 	case vctypes.CREDENTIAL_ENVELOPE_TYPE_EMBEDDED_PROOF:
-		return nil, fmt.Errorf("badge verification is not supported for embedded proof badges yet")
+		// Embedded proof badges are not supported for verification yet
+		return nil, errutil.ErrInfo(
+			errtypes.ERROR_REASON_INVALID_CREDENTIAL_ENVELOPE_TYPE,
+			"embedded proof badges are not supported for verification",
+			nil,
+		)
+
 	case vctypes.CREDENTIAL_ENVELOPE_TYPE_JOSE:
-		// Decode the JWT
-		raw, err := jws.Parse([]byte(credential.Value))
+		// Decode the JWT from the credential value
+		jwt, err := jws.Parse([]byte(credential.Value))
 		if err != nil {
-			return nil, fmt.Errorf("error parsing JWT: %w", err)
+			return nil, errutil.ErrInfo(
+				errtypes.ERROR_REASON_INVALID_VERIFIABLE_CREDENTIAL,
+				"error parsing JWT from credential value",
+				err,
+			)
 		}
 
+		// Load the payload from the JWT
 		var validatedVC vctypes.VerifiableCredential
 
-		err = json.Unmarshal(raw.Payload(), &validatedVC)
+		err = json.Unmarshal(jwt.Payload(), &validatedVC)
 		if err != nil {
-			return nil, fmt.Errorf("error unmarshaling JWT payload: %w", err)
+			return nil, errutil.ErrInfo(
+				errtypes.ERROR_REASON_INVALID_VERIFIABLE_CREDENTIAL,
+				"error unmarshaling JWT payload to VerifiableCredential",
+				err,
+			)
 		}
 
+		// Load the claims from the CredentialSubject
 		claims := &vctypes.BadgeClaims{}
 
 		err = claims.FromMap(validatedVC.CredentialSubject)
 		if err != nil {
-			return nil, err
+			return nil, errutil.ErrInfo(
+				errtypes.ERROR_REASON_INVALID_VERIFIABLE_CREDENTIAL,
+				"error loading claims from CredentialSubject",
+				err,
+			)
 		}
 
 		// Resolve the Resolver Metadata ID to get the public key
 		resolvedMetadata, err := client.ResolveMetadataByID(ctx, claims.ID)
 		if err != nil {
-			return nil, fmt.Errorf("error resolving Resolver Metadata ID: %w", err)
+			return nil, errutil.ErrInfo(
+				errtypes.ERROR_REASON_RESOLVER_METADATA_NOT_FOUND,
+				"error resolving metadata by ID",
+				err,
+			)
 		}
 
-		// convert resolvedMetadata.VerificationMethods to JWKs
+		// Convert resolvedMetadata.VerificationMethods to JWKs
 		var jwks idtypes.Jwks
 		for _, vm := range resolvedMetadata.VerificationMethod {
 			jwks.Keys = append(jwks.Keys, vm.PublicKeyJwk)
@@ -86,11 +130,44 @@ func (v *verifyService) VerifyCredential(
 		// Verify the badge using the Resolver Metadata public key
 		parsedVC, err := jose.Verify(&jwks, credential)
 		if err != nil {
-			return nil, fmt.Errorf("error verifying badge: %w", err)
+			return nil, errutil.ErrInfo(
+				errtypes.ERROR_REASON_INVALID_VERIFIABLE_CREDENTIAL,
+				"error verifying badge with Resolver Metadata public key",
+				err,
+			)
 		}
 
+		// Return the parsed VerifiableCredential
 		return parsedVC, nil
+
 	default:
-		return nil, fmt.Errorf("unsupported badge envelope type: %s", credential.EnvelopeType)
+		// If the envelope type is not supported, return an error
+		return nil, errutil.ErrInfo(
+			errtypes.ERROR_REASON_INVALID_CREDENTIAL_ENVELOPE_TYPE,
+			"unsupported credential envelope type",
+			nil,
+		)
 	}
+}
+
+// VerifyBadge verifies a badge JSON string and returns the parsed VerifiableCredential
+func (v *verifier) VerifyBadge(
+	ctx context.Context,
+	badgeJson string,
+	identityNodeURL string,
+) (*vctypes.VerifiableCredential, error) {
+	// Unmarshal the badge JSON into an EnvelopedCredential
+	var badge *vctypes.EnvelopedCredential
+
+	err := json.Unmarshal([]byte(badgeJson), &badge)
+	if err != nil {
+		return nil, errutil.ErrInfo(
+			errtypes.ERROR_REASON_INVALID_VERIFIABLE_CREDENTIAL,
+			"error unmarshaling badge JSON to EnvelopedCredential",
+			err,
+		)
+	}
+
+	// Call the VerifyCredential method with the provided badge
+	return v.VerifyCredential(ctx, badge, identityNodeURL)
 }
