@@ -25,9 +25,9 @@ import (
 	mdfs "github.com/agntcy/identity/internal/issuer/metadata/data/filesystem"
 	"github.com/agntcy/identity/internal/issuer/vault"
 	vaultfs "github.com/agntcy/identity/internal/issuer/vault/data/filesystem"
-	"github.com/agntcy/identity/internal/issuer/verify"
 	"github.com/agntcy/identity/internal/pkg/nodeapi"
 	"github.com/agntcy/identity/internal/pkg/oidc"
+	"github.com/agntcy/identity/pkg/vc/verify"
 
 	"github.com/spf13/cobra"
 )

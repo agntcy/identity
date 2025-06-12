@@ -10,8 +10,8 @@ import (
 	"os"
 
 	vctypes "github.com/agntcy/identity/internal/core/vc/types"
-	verifysrv "github.com/agntcy/identity/internal/issuer/verify"
 	"github.com/agntcy/identity/internal/pkg/cmdutil"
+	verifysrv "github.com/agntcy/identity/pkg/vc/verify"
 
 	"github.com/spf13/cobra"
 )
