@@ -23,6 +23,11 @@ type Verifier interface {
 		credential *vctypes.EnvelopedCredential,
 		identityNodeURL string,
 	) (*vctypes.VerifiableCredential, error)
+	VerifyBadge(
+		ctx context.Context,
+		badgeJson string,
+		identityNodeURL string,
+	) (*vctypes.VerifiableCredential, error)
 }
 
 // Verifier implementation that uses a NodeClientProvider to resolve metadata
