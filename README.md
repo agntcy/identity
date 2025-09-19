@@ -36,7 +36,7 @@ As the below diagram shows, the Agent's unique ID links both to metadata resolvi
   - Metadata for authentication and other security needs.
 
 > [!NOTE]
-> This same structure applies to MCP Servers and MASs, ensuring consistency across all identity-bearing entities in the Internet of Agents.
+> This same structure applies to MCP Servers and MASs, ensuring consistency across all identity-bearing entities in the Internet of Agents (IoA).
 
 ## 📚 Table of Contents
 
