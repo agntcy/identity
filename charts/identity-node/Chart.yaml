@@ -3,7 +3,7 @@
 
 apiVersion: v2
 name: identity-node
-version: 0.1.4
+version: 0.1.5
 appVersion: "0.0.2"
 description: A Helm chart for deploying an Identity Node with a PostgreSQL instance.
 type: application
