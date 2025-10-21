@@ -3,6 +3,26 @@ entries:
   identity-node:
   - apiVersion: v2
     appVersion: 0.0.2
+    created: "2025-10-21T13:00:00.667928498Z"
+    dependencies:
+    - condition: postgresql.enabled
+      name: postgresql
+      repository: https://charts.bitnami.com/bitnami
+      version: 18.0.15
+    description: A Helm chart for deploying an Identity Node with a PostgreSQL instance.
+    digest: cca6af97b025d0b396df67a02247c04a96c43faae91fa33b484924a1149be70f
+    maintainers:
+    - name: identity
+      url: https://github.com/agntcy/identity
+    name: identity-node
+    sources:
+    - https://github.com/agntcy/identity
+    type: application
+    urls:
+    - identity-node-0.1.5.tgz
+    version: 0.1.5
+  - apiVersion: v2
+    appVersion: 0.0.2
     created: "2025-07-29T15:36:08.156079812Z"
     dependencies:
     - condition: postgresql.enabled
@@ -81,4 +101,4 @@ entries:
     urls:
     - identity-node-0.1.1.tgz
     version: 0.1.1
-generated: "2025-07-29T15:36:08.156097175Z"
+generated: "2025-10-21T13:00:00.667969645Z"
