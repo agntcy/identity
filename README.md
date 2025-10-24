@@ -20,6 +20,8 @@
 **AGNTCY Identity** enables to bring your own identity using conventions like IDs assigned by Identity Providers (e.g., Okta) or Agent Cards (e.g., Google’s A2A), or be assigned an ID following standards (e.g., W3C DIDs).
 This component ensures that every agent in the **AGNTCY** ecosystem has a verifiable, universally unique identity, enabling secure authentication, trusted communication, and interoperability across diverse multi-agent systems, regardless of the identity assignment method.
 
+As the below diagram shows, the Agent's unique ID links both to metadata resolving that ID, and to one or more Agent Badges.  Agent Badges essentially are containers for verifying metadata. 
+
 <p align="center">
    <picture>
    <source media="(prefers-color-scheme: dark)" srcset="img/agent-badge-dark.png" width="100%">
@@ -27,14 +29,14 @@ This component ensures that every agent in the **AGNTCY** ecosystem has a verifi
    </picture>
 </p>
 
-- The ID is linked to a ResolverMetadata object for secure and automated verification.
-- The ID can be linked to one or more Agent Badges. Why? Multiple badges can provide nuanced, task-specific access to different systems without over-privileging the agent. Agent Badges contain Verifiable Credentials (VCs), which include:
+- The ID links to a ResolverMetadata object for secure and automated verification.
+- You can link to one or more Agent Badges. Why? Multiple badges can provide nuanced, task-specific access to different systems without over-privileging the agent. Agent Badges contain Verifiable Credentials (VCs), which include:
   - The Agent's ID
   - Schema definition (e.g., OASF)
   - Metadata for authentication and other security needs.
 
 > [!NOTE]
-> This same structure applies to MCP Servers and MASs, ensuring consistency across all identity-bearing entities in the IoA.
+> This same structure applies to MCP Servers and MASs, ensuring consistency across all identity-bearing entities in the Internet of Agents (IoA).
 
 ## 📚 Table of Contents
 
@@ -55,7 +57,7 @@ You can also:
 
 - **Core Principle**: Trust is foundational for the Internet of Agents.
 - **Identity as the Root**: AGNTCY Identity ensures Agents and Tools (MCP Servers) are verifiably authentic.
-- **Flexible & Interoperable**: BYOID (Bring Your Own ID), integrates with existing Identity Providers (IdPs).
+- **Flexible & Interoperable**: BYOID (Bring Your Own ID), integrates with existing Identity Providers (IdPs) such as Okta.
 
 Secure and reliable communication between software agents is a cornerstone of the Internet of Agents (IoA) vision.
 Without proper identity management, malicious or unverified agents can infiltrate Multi-Agent Systems (MASs), leading to misinformation, fraud, or security breaches.
@@ -75,24 +77,25 @@ This applies equally to:
 
 - **Identity creation**: Generate unique, verifiable identities for agents and MCP servers.
 - **Existing identity onboarding**: Integrate identities from external IdPs.
-- **Badges creation & verification**: Authenticate agents and MCP servers and validate metadata.
+- **Badge creation & verification**: Authenticate agents and MCP servers and validate metadata.
 
 ### Main Components
 
-- **Issuer CLI**: Manage identities, vaults and credentials via command-line interface.
+- **Issuer CLI**: Manage identities, vaults, and credentials.
 - **Node Backend**: Backend server for identity management and metadata.
 
 ## ⚡️ Get Started in 5 Minutes
 
-This short guide allows you to setup the Identity `Issuer CLI` as well as the Identity `Node Backend`.
-The `Issuer CLI` allows to generate, register, search for, and verify badges for Agents and MCP Servers. The CLI includes a library enabling storage and retrieval of the keys required to sign the badges, both on local storage or using a 3rd party wallet or vault.
-The `Node Backend` comprises the APIs and the backend core. It stores, maintains, and binds org:sub-org IDs, PubKeys, Subject IDs and metadata, including badges, ResolverMetadata and Verifiable Credentials (VCs).
+This short guide shows you how to set up the Identity `Issuer CLI` as well as the Identity `Node Backend`.
+The `Issuer CLI` enables you to generate, register, search for, and verify badges for Agents and MCP Servers. It includes a library enabling storage and retrieval of the keys required to sign the badges, both on local storage or using a 3rd-party wallet or vault.
+The `Node Backend` comprises the APIs and the backend core. It stores, maintains, and binds org:sub-org IDs, PubKeys, Subject IDs and metadata (including badges), ResolverMetadata, and Verifiable Credentials (VCs).
 
 ### Prerequisites
 
-To run these steps successfully, you need to have the following installed:
+To run these steps, you must either:
 
-- [Docker Desktop](https://docs.docker.com/get-docker/), or have both: [Docker Engine v27 or higher](https://docs.docker.com/engine/install/) and [Docker Compose v2.35 or higher](https://docs.docker.com/compose/install/)
+- install [Docker Desktop](https://docs.docker.com/get-docker/), or
+- have both [Docker Engine v27 or higher](https://docs.docker.com/engine/install/) and [Docker Compose v2.35 or higher](https://docs.docker.com/compose/install/)
 
 ### Step 1: Install the Issuer CLI
 
@@ -113,7 +116,7 @@ sh -c "$(wget -qO- https://raw.githubusercontent.com/agntcy/identity/refs/heads/
 > [!NOTE]
 > You can also download the `Issuer CLI` binary corresponding to your platform from the [latest releases](https://github.com/agntcy/identity/releases).
 >
-> On some platforms you might need to add execution permissions and/or approve the binary in `System Security Settings`.
+> On some platforms you might also need to add execution permissions and/or approve the binary in `System Security Settings`.
 >
 > For easier use, consider moving the binary to your `$PATH` or to the `/usr/local/bin` folder.
 
@@ -168,8 +171,8 @@ Here are the core commands you can use with the CLI
 
 ## 🧪 Run the demo
 
-This demo scenario will allow you to see how to use the AGNTCY Identity components can be used in a real environment.
-You will be able to perform the following:
+This scenario demonstrates how to use the AGNTCY Identity components in a real environment.
+You will be able to:
 
 - Register as an Issuer
 - Generate metadata for an MCP Server
@@ -180,16 +183,16 @@ You will be able to perform the following:
 
 First, follow the steps in the [Get Started in 5 minutes](#%EF%B8%8F-get-started-in-5-minutes) section above to install the `Issuer CLI` and run the `Node Backend`, and generate a local vault and keys.
 
-To run this demo setup locally, you need to have the following installed:
+To run this demo setup locally, you must:
 
-- [Docker Desktop](https://docs.docker.com/get-docker/), or have both: [Docker Engine v27 or higher](https://docs.docker.com/engine/install/) and [Docker Compose v2.35 or higher](https://docs.docker.com/compose/install/)
+- either install [Docker Desktop](https://docs.docker.com/get-docker/), or have both [Docker Engine v27 or higher](https://docs.docker.com/engine/install/) and [Docker Compose v2.35 or higher](https://docs.docker.com/compose/install/)
 - [Ollama CLI](https://ollama.com/download)
 - [Okta CLI](https://cli.okta.com/manual/#installation)
 
 ### Step 1: Run the Samples with Ollama and Docker
 
 The agents in the samples rely on a local instance of the Llama 3.2 LLM to power the agent's capabilities.
-With Ollama installed, you can download and run the model (which is approximately 2GB, so ensure you have enough disk space) using the following command:
+With Ollama installed, you can download and run the model using the following command:
 
 1. Run the Llama 3.2 model:
 
@@ -197,7 +200,10 @@ With Ollama installed, you can download and run the model (which is approximatel
    ollama run llama3.2
    ```
 
-2. From the root of the repository, navigate to the `samples` directory and run the following command to deploy the `Currency Exchange A2A Agent` leveraging the `Currency Exchange MCP Server`:
+> [!NOTE]
+> The model is approximately 2GB.  Ensure you have enough disk space.
+
+2. From the root of the repository, navigate to the `samples` directory and run the below command to deploy the `Currency Exchange A2A Agent` leveraging the `Currency Exchange MCP Server`:
 
    ```bash
    cd samples && docker compose up -d
@@ -221,7 +227,7 @@ With Ollama installed, you can download and run the model (which is approximatel
 
 ### Step 3: Register as an Issuer
 
-For this demo we will use Okta as an IdP to create an application for the Issuer.
+This demo uses Okta as an IdP to create an application for the Issuer.
 To quickly create a trial account and application, we have provided a script to automate the process using the Okta CLI.
 
 > [!IMPORTANT]
@@ -273,7 +279,7 @@ Create a second application for the MCP Server metadata using Okta, similar to t
    ```
 
 > [!NOTE]
-> When successful, this command will print the metadata ID, which you will need in the next step to view published badges that are linked to this metadata.
+> This command prints the metadata ID, which you need in the next step to view published badges that are linked to this metadata.
 
 ### Step 5: Issue and Publish a Badge for the MCP Server
 
@@ -295,10 +301,10 @@ Create a second application for the MCP Server metadata using Okta, similar to t
 
 ### (Optional) Step 6: Verify a Published Badge
 
-You can use the `Issuer CLI` to verify a published badge any published badge, not just those that you issued yourself.
-This allows others to verify the Agent and MCP badges you publish.
+You can use the `Issuer CLI` to verify any published badge -- not just those you issued yourself.  
+This also enables others to verify your published Agent and MCP badges in addition to their own.
 
-1. Download the badge that you created in the previous step, replacing {metadata_id} with the metadata ID from step 4:
+1. Download the badge you created in Step 5 of the previous procedure, replacing {metadata_id} with the metadata ID from step 4:
 
    ```bash
    curl -o vcs.json http://localhost:4000/v1alpha1/vc/{metadata_id}/.well-known/vcs.json
@@ -311,7 +317,7 @@ This allows others to verify the Agent and MCP badges you publish.
    ```
 
 > [!NOTE]
-> You can also use our Python SDK to verify the badge programmatically. See the [Python SDK](sdk/python/README.md) for more details.
+> You can also use [our Python SDK](sdk/python/README.md) to verify the badge programmatically.
 
 ## Development
 
