@@ -68,6 +68,7 @@ func (s *LocalFileKeyService) SaveKey(ctx context.Context, id string, jwk *jwkty
 	if _, err := file.Seek(0, 0); err != nil {
 		return err
 	}
+
 	encoder := json.NewEncoder(file)
 
 	return encoder.Encode(jwks)

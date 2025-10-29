@@ -101,6 +101,7 @@ func (cmd *RegisterCommand) Run(ctx context.Context, flags *RegisterFlags) error
 	commonName := flags.CommonName
 	issuerAuthType := coreissuertypes.ISSUER_AUTH_TYPE_SELF
 	id := uuid.NewString()
+
 	var idpConfig *idptypes.IdpConfig
 
 	// If the common name is not set, use the IdP configuration

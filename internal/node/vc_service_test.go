@@ -177,6 +177,7 @@ func TestVerifyVC_Should_Succeed(t *testing.T) {
 	sut := setupVcServiceWithResolverMD(t, pubKey)
 	envelope, err := signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
+
 	_ = sut.Publish(context.Background(), envelope, &vctypes.Proof{Type: "JWT"})
 
 	result, err := sut.Verify(t.Context(), envelope)
@@ -204,6 +205,7 @@ func TestVerifyVC_Should_Fail_When_Revoked(t *testing.T) {
 	sut := setupVcServiceWithResolverMD(t, pubKey)
 	envelope, err := signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
+
 	_ = sut.Publish(context.Background(), envelope, &vctypes.Proof{Type: "JWT"})
 
 	result, err := sut.Verify(t.Context(), envelope)
@@ -225,6 +227,7 @@ func TestRevokeVC_Should_Succeed(t *testing.T) {
 	sut := setupVcServiceWithResolverMD(t, pubKey)
 	envelope, err := signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
+
 	_ = sut.Publish(context.Background(), envelope, &vctypes.Proof{Type: "JWT"})
 
 	// Revoke
@@ -254,6 +257,7 @@ func TestRevokeVC_Should_Fail_When_VC_Not_Found(t *testing.T) {
 	sut := setupVcServiceWithResolverMD(t, pubKey)
 	envelope, err := signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
+
 	_ = sut.Publish(context.Background(), envelope, &vctypes.Proof{Type: "JWT"})
 
 	// Revoke
@@ -290,6 +294,7 @@ func TestRevoke_Should_Fail_When_VC_Already_Revoked(t *testing.T) {
 	sut := setupVcServiceWithResolverMD(t, pubKey)
 	envelope, err := signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
+
 	_ = sut.Publish(context.Background(), envelope, &vctypes.Proof{Type: "JWT"})
 
 	// Revoke
@@ -390,12 +395,15 @@ func TestRevoke_Should_Fail_When_Status_Does_Not_Have_Revocation(t *testing.T) {
 	}
 	privKey, pubKey, _ := genKey()
 	sut := setupVcServiceWithResolverMD(t, pubKey)
+
 	envelope, err := signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
+
 	_ = sut.Publish(context.Background(), envelope, &vctypes.Proof{Type: "JWT"})
 
 	// Revoke
 	credential.Status = []*vctypes.CredentialStatus{}
+
 	envelope, err = signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
 

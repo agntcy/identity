@@ -9,20 +9,6 @@ import (
 	"github.com/agntcy/identity/internal/pkg/ptrutil"
 )
 
-func FromIssuer(src *issuertypes.Issuer) *coreapi.Issuer {
-	if src == nil {
-		return nil
-	}
-
-	return &coreapi.Issuer{
-		Organization:    ptrutil.Ptr(src.Organization),
-		SubOrganization: ptrutil.Ptr(src.SubOrganization),
-		CommonName:      ptrutil.Ptr(src.CommonName),
-		PublicKey:       FromJwk(src.PublicKey),
-		AuthType:        ptrutil.Ptr(coreapi.IssuerAuthType(src.AuthType)),
-	}
-}
-
 func ToIssuer(src *coreapi.Issuer) *issuertypes.Issuer {
 	if src == nil {
 		return nil

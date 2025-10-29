@@ -83,7 +83,9 @@ func (s *client) Authenticate(
 	options ...AuthOption,
 ) (string, error) {
 	var in authInput
+
 	var token string
+
 	var err error
 
 	for _, opt := range options {

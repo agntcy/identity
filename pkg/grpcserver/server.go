@@ -26,8 +26,10 @@ func New(host string, opts ...grpc.ServerOption) (*Server, error) {
 	return srv, nil
 }
 
-func (s *Server) Run() error {
-	listener, err := net.Listen("tcp", s.host)
+func (s *Server) Run(ctx context.Context) error {
+	var lc net.ListenConfig
+
+	listener, err := lc.Listen(ctx, "tcp", s.host)
 	if err != nil {
 		return err
 	}

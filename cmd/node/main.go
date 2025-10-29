@@ -50,6 +50,11 @@ func main() {
 		log.WithFields(logrus.Fields{log.ErrorField: err}).Fatal("failed to start")
 	}
 
+	if config == nil {
+		log.Error("config is nil")
+		os.Exit(1)
+	}
+
 	// Configure log level
 	log.Init(config.GoEnv)
 	log.SetLogLevel(config.LogLevel)
@@ -168,7 +173,7 @@ func main() {
 	log.Info("Serving gRPC on:", config.ServerGrpcHost)
 
 	go func() {
-		if err := grpcsrv.Run(); err != nil {
+		if err := grpcsrv.Run(ctx); err != nil {
 			log.Fatal(err)
 		}
 	}()
@@ -233,6 +238,7 @@ func main() {
 	if config.GoEnv != "development" {
 		options.Debug = false
 	}
+
 	c := cors.New(options)
 
 	gwServer := &http.Server{

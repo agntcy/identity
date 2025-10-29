@@ -23,11 +23,11 @@ var fileParsers = []func(data []byte) ([]*vctypes.EnvelopedCredential, error){
 }
 
 func readBadgesFromFile(path string) (iter.Seq2[*vctypes.EnvelopedCredential, error], error) {
-	var err error
 	var vcs []*vctypes.EnvelopedCredential
 
 	// Check if the badge file exists
-	if _, err := os.Stat(path); os.IsNotExist(err) {
+	_, err := os.Stat(path)
+	if os.IsNotExist(err) {
 		return nil, fmt.Errorf("file does not exist: %s", path)
 	}
 
@@ -87,6 +87,7 @@ func parseAsVcWellKnownResponse(data []byte) ([]*vctypes.EnvelopedCredential, er
 
 	for _, vc := range vcs.Vcs {
 		var envelopedCredential vctypes.EnvelopedCredential
+
 		envelopedCredential.Value = vc.Value
 
 		err := envelopedCredential.EnvelopeType.UnmarshalText([]byte(*vc.EnvelopeType))

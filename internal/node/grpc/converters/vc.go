@@ -13,17 +13,6 @@ import (
 	"google.golang.org/protobuf/types/known/structpb"
 )
 
-func FromEnvelopedCredential(src *vctypes.EnvelopedCredential) *coreapi.EnvelopedCredential {
-	if src == nil {
-		return nil
-	}
-
-	return &coreapi.EnvelopedCredential{
-		EnvelopeType: ptrutil.Ptr(coreapi.CredentialEnvelopeType(src.EnvelopeType)),
-		Value:        ptrutil.Ptr(src.Value),
-	}
-}
-
 func ToEnvelopedCredential(src *coreapi.EnvelopedCredential) *vctypes.EnvelopedCredential {
 	if src == nil {
 		return nil
@@ -37,54 +26,14 @@ func ToEnvelopedCredential(src *coreapi.EnvelopedCredential) *vctypes.EnvelopedC
 	}
 }
 
-func FromCredentialContent(src *vctypes.CredentialContent) *coreapi.CredentialContent {
-	if src == nil {
-		return nil
-	}
-
-	content, err := structpb.NewValue(src.Content)
-	if err != nil {
-		log.Warn(err)
-	}
-
-	return &coreapi.CredentialContent{
-		ContentType: ptrutil.Ptr(coreapi.CredentialContentType(src.Type)),
-		Content:     content.GetStructValue(),
-	}
-}
-
-func ToCredentialContent(src *coreapi.CredentialContent) *vctypes.CredentialContent {
-	if src == nil {
-		return nil
-	}
-
-	return &vctypes.CredentialContent{
-		Type: vctypes.CredentialContentType(
-			ptrutil.Derefrence(src.ContentType, 0),
-		),
-		Content: src.Content.AsMap(),
-	}
-}
-
 func FromCredentialSchema(src *vctypes.CredentialSchema) *coreapi.CredentialSchema {
 	if src == nil {
 		return nil
 	}
 
 	return &coreapi.CredentialSchema{
-		Type: ptrutil.Ptr(src.Type),
-		Id:   ptrutil.Ptr(src.ID),
-	}
-}
-
-func ToCredentialSchema(src *coreapi.CredentialSchema) *vctypes.CredentialSchema {
-	if src == nil {
-		return nil
-	}
-
-	return &vctypes.CredentialSchema{
-		Type: ptrutil.DerefStr(src.Type),
-		ID:   ptrutil.DerefStr(src.Id),
+		Type: &src.Type,
+		Id:   &src.ID,
 	}
 }
 
@@ -94,9 +43,9 @@ func FromProof(src *vctypes.Proof) *coreapi.Proof {
 	}
 
 	return &coreapi.Proof{
-		Type:         ptrutil.Ptr(src.Type),
-		ProofPurpose: ptrutil.Ptr(src.ProofPurpose),
-		ProofValue:   ptrutil.Ptr(src.ProofValue),
+		Type:         &src.Type,
+		ProofPurpose: &src.ProofPurpose,
+		ProofValue:   &src.ProofValue,
 	}
 }
 
@@ -125,11 +74,11 @@ func FromVerifiableCredential(src *vctypes.VerifiableCredential) *coreapi.Verifi
 	return &coreapi.VerifiableCredential{
 		Context:        src.Context,
 		Type:           src.Type,
-		Issuer:         ptrutil.Ptr(src.Issuer),
+		Issuer:         &src.Issuer,
 		Content:        content.GetStructValue(),
-		Id:             ptrutil.Ptr(src.ID),
-		IssuanceDate:   ptrutil.Ptr(src.IssuanceDate),
-		ExpirationDate: ptrutil.Ptr(src.ExpirationDate),
+		Id:             &src.ID,
+		IssuanceDate:   &src.IssuanceDate,
+		ExpirationDate: &src.ExpirationDate,
 		CredentialSchema: convertutil.ConvertSlice(
 			src.CredentialSchema,
 			FromCredentialSchema,
@@ -139,38 +88,17 @@ func FromVerifiableCredential(src *vctypes.VerifiableCredential) *coreapi.Verifi
 	}
 }
 
-func ToVerifiableCredential(src *coreapi.VerifiableCredential) *vctypes.VerifiableCredential {
-	if src == nil {
-		return nil
-	}
-
-	return &vctypes.VerifiableCredential{
-		Context:           src.Context,
-		Type:              src.Type,
-		Issuer:            ptrutil.DerefStr(src.Issuer),
-		CredentialSubject: src.Content.AsMap(),
-		ID:                ptrutil.DerefStr(src.Id),
-		IssuanceDate:      ptrutil.DerefStr(src.IssuanceDate),
-		ExpirationDate:    ptrutil.DerefStr(src.ExpirationDate),
-		CredentialSchema: convertutil.ConvertSlice(
-			src.CredentialSchema,
-			ToCredentialSchema,
-		),
-		Proof: ToProof(src.Proof),
-	}
-}
-
 func FromVerificationResult(src *vctypes.VerificationResult) *coreapi.VerificationResult {
 	if src == nil {
 		return nil
 	}
 
 	return &coreapi.VerificationResult{
-		Status:                       ptrutil.Ptr(src.Status),
+		Status:                       &src.Status,
 		Document:                     FromVerifiableCredential(src.Document),
-		MediaType:                    ptrutil.Ptr(src.MediaType),
-		Controller:                   ptrutil.Ptr(src.Controller),
-		ControlledIdentifierDocument: ptrutil.Ptr(src.ControlledIdentifierDocument),
+		MediaType:                    &src.MediaType,
+		Controller:                   &src.Controller,
+		ControlledIdentifierDocument: &src.ControlledIdentifierDocument,
 		Warnings: convertutil.ConvertSlice(src.Warnings, func(err errtypes.ErrorInfo) *coreapi.ErrorInfo {
 			return FromErrorInfo(&err)
 		}),
@@ -186,8 +114,8 @@ func FromCredentialStatus(src *vctypes.CredentialStatus) *coreapi.CredentialStat
 	}
 
 	return &coreapi.CredentialStatus{
-		Id:      ptrutil.Ptr(src.ID),
-		Type:    ptrutil.Ptr(src.Type),
+		Id:      &src.ID,
+		Type:    &src.Type,
 		Purpose: ptrutil.Ptr(coreapi.CredentialStatusPurpose(src.Purpose)),
 	}
 }

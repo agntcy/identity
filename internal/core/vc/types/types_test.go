@@ -7,10 +7,11 @@ import (
 	"encoding/json"
 	"testing"
 
+	"github.com/stretchr/testify/assert"
+
 	errtesting "github.com/agntcy/identity/internal/core/errors/testing"
 	errtypes "github.com/agntcy/identity/internal/core/errors/types"
 	"github.com/agntcy/identity/internal/core/vc/types"
-	"github.com/stretchr/testify/assert"
 )
 
 func TestMarshalJson_CredentialEnvelopeType(t *testing.T) {
@@ -18,6 +19,7 @@ func TestMarshalJson_CredentialEnvelopeType(t *testing.T) {
 
 	t.Run("Marshal CREDENTIAL_ENVELOPE_TYPE_EMBEDDED_PROOF", func(t *testing.T) {
 		t.Parallel()
+
 		enum := types.CREDENTIAL_ENVELOPE_TYPE_EMBEDDED_PROOF
 
 		b, err := json.Marshal(enum)
@@ -28,6 +30,7 @@ func TestMarshalJson_CredentialEnvelopeType(t *testing.T) {
 
 	t.Run("Marshal CREDENTIAL_ENVELOPE_TYPE_JOSE", func(t *testing.T) {
 		t.Parallel()
+
 		enum := types.CREDENTIAL_ENVELOPE_TYPE_JOSE
 
 		b, err := json.Marshal(enum)
@@ -41,6 +44,7 @@ func TestUnmarshalJson_CredentialEnvelopeType(t *testing.T) {
 	t.Parallel()
 
 	blob := `["CREDENTIAL_ENVELOPE_TYPE_EMBEDDED_PROOF", "CREDENTIAL_ENVELOPE_TYPE_JOSE"]`
+
 	var tt []types.CredentialEnvelopeType
 
 	err := json.Unmarshal([]byte(blob), &tt)

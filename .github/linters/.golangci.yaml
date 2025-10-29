@@ -74,7 +74,7 @@ linters:
     - usestdlibvars
     - wastedassign
     - whitespace
-    - wsl
+    - wsl_v5
   settings:
     nestif:
       min-complexity: 10

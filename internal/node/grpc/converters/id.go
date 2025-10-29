@@ -17,7 +17,7 @@ func FromResolverMetadata(src *idtypes.ResolverMetadata) *coreapi.ResolverMetada
 	}
 
 	return &coreapi.ResolverMetadata{
-		Id:              ptrutil.Ptr(src.ID),
+		Id:              &src.ID,
 		AssertionMethod: src.AssertionMethod,
 		VerificationMethod: convertutil.ConvertSlice(
 			src.VerificationMethod,
@@ -36,7 +36,7 @@ func FromVerificationMethod(src *idtypes.VerificationMethod) *coreapi.Verificati
 	}
 
 	return &coreapi.VerificationMethod{
-		Id:           ptrutil.Ptr(src.ID),
+		Id:           &src.ID,
 		PublicKeyJwk: FromJwk(src.PublicKeyJwk),
 	}
 }
@@ -57,21 +57,21 @@ func FromJwk(src *jwk.Jwk) *coreapi.Jwk {
 	}
 
 	return &coreapi.Jwk{
-		Alg:  ptrutil.Ptr(src.ALG),
-		Kty:  ptrutil.Ptr(src.KTY),
-		Use:  ptrutil.Ptr(src.USE),
-		Kid:  ptrutil.Ptr(src.KID),
-		Pub:  ptrutil.Ptr(src.PUB),
-		Priv: ptrutil.Ptr(src.PRIV),
-		Seed: ptrutil.Ptr(src.SEED),
-		E:    ptrutil.Ptr(src.E),
-		N:    ptrutil.Ptr(src.N),
-		D:    ptrutil.Ptr(src.D),
-		P:    ptrutil.Ptr(src.P),
-		Q:    ptrutil.Ptr(src.Q),
-		Dp:   ptrutil.Ptr(src.DP),
-		Dq:   ptrutil.Ptr(src.DQ),
-		Qi:   ptrutil.Ptr(src.QI),
+		Alg:  &src.ALG,
+		Kty:  &src.KTY,
+		Use:  &src.USE,
+		Kid:  &src.KID,
+		Pub:  &src.PUB,
+		Priv: &src.PRIV,
+		Seed: &src.SEED,
+		E:    &src.E,
+		N:    &src.N,
+		D:    &src.D,
+		P:    &src.P,
+		Q:    &src.Q,
+		Dp:   &src.DP,
+		Dq:   &src.DQ,
+		Qi:   &src.QI,
 	}
 }
 

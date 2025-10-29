@@ -27,6 +27,7 @@ func GetFromCache[T interface{}](
 
 		// Decode the result
 		var cachedEntry T
+
 		decoder := gob.NewDecoder(bytes.NewBuffer(rawBytes))
 
 		decodeErr := decoder.Decode(&cachedEntry)
@@ -48,6 +49,7 @@ func AddToCache[T interface{}](
 	value *T,
 ) error {
 	var rawTCache bytes.Buffer
+
 	encoder := gob.NewEncoder(&rawTCache)
 
 	// Encode the value

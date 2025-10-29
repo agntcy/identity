@@ -89,6 +89,7 @@ func (v *Vault) UnmarshalVault(data []byte) error {
 		if err := json.Unmarshal(temp.Config, &config); err != nil {
 			return err
 		}
+
 		v.Config = &config
 
 	case VaultTypeHashicorp:
@@ -96,6 +97,7 @@ func (v *Vault) UnmarshalVault(data []byte) error {
 		if err := json.Unmarshal(temp.Config, &config); err != nil {
 			return err
 		}
+
 		v.Config = &config
 
 	default:
