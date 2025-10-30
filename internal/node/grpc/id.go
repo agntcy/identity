@@ -34,11 +34,7 @@ func (s *idService) Generate(
 		converters.ToProof(req.Proof),
 	)
 	if err != nil {
-		if errtypes.IsErrorInfo(err, errtypes.ERROR_REASON_INTERNAL) {
-			return nil, grpcutil.InternalError(err)
-		}
-
-		return nil, grpcutil.BadRequestError(err)
+		return nil, grpcutil.Error(err)
 	}
 
 	return &nodeapi.GenerateResponse{
@@ -57,7 +53,7 @@ func (s *idService) Resolve(
 			return nil, grpcutil.NotFoundError(err)
 		}
 
-		return nil, grpcutil.InternalError(err)
+		return nil, grpcutil.Error(err)
 	}
 
 	return &nodeapi.ResolveResponse{

@@ -19,6 +19,7 @@ import (
 	issuergrpc "github.com/agntcy/identity/internal/issuer/grpc"
 	"github.com/agntcy/identity/internal/node"
 	nodegrpc "github.com/agntcy/identity/internal/node/grpc"
+	"github.com/agntcy/identity/internal/node/grpc/interceptors"
 	"github.com/agntcy/identity/internal/pkg/grpcutil"
 	"github.com/agntcy/identity/pkg/cmd"
 	"github.com/agntcy/identity/pkg/db"
@@ -119,10 +120,13 @@ func main() {
 		}
 	}()
 
+	// Unhandled errors interceptor
+	errorInterceptor := interceptors.NewErrorInterceptor(config.IsProd())
+
 	// Create a GRPC server
 	grpcsrv, err := grpcserver.New(
 		config.ServerGrpcHost,
-		grpc.ChainUnaryInterceptor(),
+		grpc.ChainUnaryInterceptor(errorInterceptor.Unary),
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.MaxRecvMsgSize(maxMsgSize),
 		grpc.MaxSendMsgSize(maxMsgSize),
@@ -151,7 +155,6 @@ func main() {
 	idGenerator := node.NewIDGenerator(verificationService)
 	nodeIdService := node.NewIdService(
 		idRepository,
-		issuerRepository,
 		idGenerator,
 	)
 	nodeVcService := node.NewVerifiableCredentialService(

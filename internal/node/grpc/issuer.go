@@ -37,7 +37,7 @@ func (i *issuerService) Register(
 		converters.ToProof(req.Proof),
 	)
 	if err != nil {
-		return nil, grpcutil.BadRequestError(err)
+		return nil, grpcutil.Error(err)
 	}
 
 	// Return the action uri
@@ -55,7 +55,7 @@ func (i *issuerService) GetWellKnown(
 	// Get the issuer's public keys by common name
 	jwks, err := i.nodeIssuerService.GetJwks(ctx, req.CommonName)
 	if err != nil {
-		return nil, grpcutil.BadRequestError(err)
+		return nil, grpcutil.Error(err)
 	}
 
 	return &nodeapi.GetIssuerWellKnownResponse{

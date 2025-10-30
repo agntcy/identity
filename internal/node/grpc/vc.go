@@ -5,11 +5,10 @@ package grpc
 
 import (
 	"context"
-	"fmt"
+	"errors"
 
 	coreapi "github.com/agntcy/identity/api/server/agntcy/identity/core/v1alpha1"
 	nodeapi "github.com/agntcy/identity/api/server/agntcy/identity/node/v1alpha1"
-	errtypes "github.com/agntcy/identity/internal/core/errors/types"
 	"github.com/agntcy/identity/internal/node"
 	"github.com/agntcy/identity/internal/node/grpc/converters"
 	"github.com/agntcy/identity/internal/pkg/grpcutil"
@@ -38,11 +37,7 @@ func (s *vcService) Publish(
 		converters.ToProof(req.Proof),
 	)
 	if err != nil {
-		if errtypes.IsErrorInfo(err, errtypes.ERROR_REASON_INTERNAL) {
-			return nil, grpcutil.InternalError(err)
-		}
-
-		return nil, grpcutil.BadRequestError(err)
+		return nil, grpcutil.Error(err)
 	}
 
 	return &emptypb.Empty{}, nil
@@ -55,11 +50,7 @@ func (s *vcService) Verify(
 ) (*coreapi.VerificationResult, error) {
 	result, err := s.vcSrv.Verify(ctx, converters.ToEnvelopedCredential(req.Vc))
 	if err != nil {
-		if errtypes.IsErrorInfo(err, errtypes.ERROR_REASON_INTERNAL) {
-			return nil, grpcutil.InternalError(err)
-		}
-
-		return nil, grpcutil.BadRequestError(err)
+		return nil, grpcutil.Error(err)
 	}
 
 	return converters.FromVerificationResult(result), nil
@@ -75,11 +66,7 @@ func (s *vcService) GetWellKnown(
 		req.Id,
 	)
 	if err != nil {
-		if errtypes.IsErrorInfo(err, errtypes.ERROR_REASON_INTERNAL) {
-			return nil, grpcutil.InternalError(err)
-		}
-
-		return nil, grpcutil.BadRequestError(err)
+		return nil, grpcutil.Error(err)
 	}
 
 	response := &nodeapi.GetVcWellKnownResponse{
@@ -96,11 +83,11 @@ func (s *vcService) GetWellKnown(
 }
 
 // Search for Verifiable Credentials based on the specified criteria
-func (vcService) Search(
+func (*vcService) Search(
 	ctx context.Context,
 	req *nodeapi.SearchRequest,
 ) (*nodeapi.SearchResponse, error) {
-	return nil, fmt.Errorf("not implemented")
+	return nil, grpcutil.UnimplementedError(errors.New("search endpoint is not implemented"))
 }
 
 // Revoke an existing Verifiable Credential
@@ -114,11 +101,7 @@ func (s *vcService) Revoke(
 		converters.ToProof(req.Proof),
 	)
 	if err != nil {
-		if errtypes.IsErrorInfo(err, errtypes.ERROR_REASON_INTERNAL) {
-			return nil, grpcutil.InternalError(err)
-		}
-
-		return nil, grpcutil.BadRequestError(err)
+		return nil, grpcutil.Error(err)
 	}
 
 	return &emptypb.Empty{}, nil

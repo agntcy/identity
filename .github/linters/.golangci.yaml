@@ -112,6 +112,17 @@ linters:
       force-short-decl-cuddling: false
     funlen:
       lines: 100
+    unused:
+      # Mark all struct fields that have been written to as used.
+      field-writes-are-uses: false
+      # Treat IncDec statement (e.g. `i++` or `i--`) as both read and write operation instead of just write.
+      post-statements-are-reads: true
+      # Mark all exported fields as used.
+      exported-fields-are-used: false
+      # Mark all local variables as used.
+      local-variables-are-used: false
+      # Mark all identifiers inside generated files as used.
+      generated-is-used: false
   exclusions:
     generated: lax
     presets:
