@@ -1,7 +1,7 @@
 # Copyright 2025 AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 
-.PHONY: do_generate_proto do_generate_node_sdk do_start_node
+.PHONY: do_generate_proto do_generate_node_sdk do_generate_mocks do_start_node
 
 do_generate_proto:
 	cd scripts/proto && ./generate.sh
@@ -11,6 +11,10 @@ do_generate_node_sdk:
 	chmod +x scripts/node/generate.sh
 	./scripts/node/generate.sh
 	@echo "Generated Node SDK"
+
+do_generate_mocks:
+	cd scripts && ./mockery.sh
+	@echo "Generated GO mocks with Mockery"
 
 do_start_node:
 	@./deployments/scripts/identity/launch_node.sh ${dev}
@@ -25,6 +29,8 @@ do_stop_node:
 generate_proto: do_generate_proto
 
 generate_node_sdk: do_generate_node_sdk
+
+generate_mocks: do_generate_mocks
 
 stop_node: do_stop_node
 start_node: do_start_node
