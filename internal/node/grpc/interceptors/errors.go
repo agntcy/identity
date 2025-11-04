@@ -52,7 +52,7 @@ func (i ErrorInterceptor) Unary(
 }
 
 func (i ErrorInterceptor) internalError(err error) error {
-	log.Error(err)
+	log.WithFields(logrus.Fields{log.ErrorField: err}).Error("unexpected error")
 
 	var finalErr error
 
