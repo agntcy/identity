@@ -65,7 +65,7 @@ func TestIssuerService_GetWellKnown(t *testing.T) {
 		t.Parallel()
 
 		commonName := uuid.NewString()
-		jwks := jwk.Jwks{Keys: []*jwk.Jwk{&jwk.Jwk{KID: uuid.NewString()}}}
+		jwks := jwk.Jwks{Keys: []*jwk.Jwk{{KID: uuid.NewString()}}}
 
 		issuerSrv := nodemocks.NewIssuerService(t)
 		issuerSrv.EXPECT().GetJwks(t.Context(), commonName).Return(&jwks, nil)
