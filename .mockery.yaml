@@ -11,3 +11,4 @@ packages:
   github.com/agntcy/identity/internal/node:
     interfaces:
       IdService: {}
+      IssuerService: {}
