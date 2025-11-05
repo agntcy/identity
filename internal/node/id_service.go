@@ -15,7 +15,7 @@ import (
 	issuertypes "github.com/agntcy/identity/internal/core/issuer/types"
 	vctypes "github.com/agntcy/identity/internal/core/vc/types"
 	"github.com/agntcy/identity/internal/pkg/errutil"
-	"github.com/agntcy/identity/pkg/log"
+	"github.com/agntcy/identity/internal/pkg/log"
 	"github.com/google/uuid"
 )
 
@@ -61,14 +61,14 @@ func (s *idService) Generate(
 		return nil, err
 	}
 
-	log.Debug("ID generated ", id)
+	log.FromContext(ctx).Debug("ID generated ", id)
 
 	err = s.verifyIssuer(issuer, storedIss)
 	if err != nil {
 		return nil, err
 	}
 
-	log.Debug("Generating a ResolverMetadata")
+	log.FromContext(ctx).Debug("Generating a ResolverMetadata")
 
 	keyID := fmt.Sprintf("%s#%s", id, uuid.NewString())
 
@@ -92,7 +92,7 @@ func (s *idService) Generate(
 		Controller:      issuer.CommonName,
 	}
 
-	log.Debug("Storing the ResolverMetadata")
+	log.FromContext(ctx).Debug("Storing the ResolverMetadata")
 
 	_, err = s.idRepository.CreateID(ctx, resolverMetadata, issuer)
 	if err != nil {

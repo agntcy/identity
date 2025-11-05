@@ -20,15 +20,14 @@ import (
 	"github.com/agntcy/identity/internal/node"
 	nodegrpc "github.com/agntcy/identity/internal/node/grpc"
 	"github.com/agntcy/identity/internal/node/grpc/interceptors"
+	"github.com/agntcy/identity/internal/pkg/cmd"
+	"github.com/agntcy/identity/internal/pkg/db"
+	"github.com/agntcy/identity/internal/pkg/grpcserver"
 	"github.com/agntcy/identity/internal/pkg/grpcutil"
-	"github.com/agntcy/identity/pkg/cmd"
-	"github.com/agntcy/identity/pkg/db"
-	"github.com/agntcy/identity/pkg/grpcserver"
-	"github.com/agntcy/identity/pkg/log"
+	"github.com/agntcy/identity/internal/pkg/log"
 	"github.com/agntcy/identity/pkg/oidc"
 	"github.com/grpc-ecosystem/grpc-gateway/v2/runtime"
 	"github.com/rs/cors"
-	"github.com/sirupsen/logrus"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -48,7 +47,7 @@ func main() {
 
 	config, err := cmd.GetConfiguration[Configuration]()
 	if err != nil {
-		log.WithFields(logrus.Fields{log.ErrorField: err}).Fatal("failed to start")
+		log.WithError(err).Fatal("failed to start")
 	}
 
 	if config == nil {
@@ -57,7 +56,7 @@ func main() {
 	}
 
 	// Configure log level
-	log.Init(config.GoEnv)
+	log.Init(config.IsDev())
 	log.SetLogLevel(config.LogLevel)
 
 	log.Info("Starting in env:", config.GoEnv)
@@ -71,7 +70,7 @@ func main() {
 		PermitWithoutStream: config.ServerGrpcKeepAliveEnvorcementPolicyPermitWithoutStream, // Allow pings even when there are no active streams
 	}
 
-	var kasp = keepalive.ServerParameters{
+	var kaServerParams = keepalive.ServerParameters{
 		MaxConnectionIdle: time.Duration(
 			config.ServerGrpcKeepAliveServerParametersMaxConnectionIdle,
 		) * time.Second, // If a client is idle for X seconds, send a GOAWAY
@@ -124,21 +123,24 @@ func main() {
 	errorInterceptor := interceptors.NewErrorInterceptor(config.IsProd())
 
 	// Create a GRPC server
-	grpcsrv, err := grpcserver.New(
+	grpcSrv, err := grpcserver.New(
 		config.ServerGrpcHost,
-		grpc.ChainUnaryInterceptor(errorInterceptor.Unary),
+		grpc.ChainUnaryInterceptor(
+			interceptors.ContextualLoggerUnary,
+			errorInterceptor.Unary,
+		),
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.MaxRecvMsgSize(maxMsgSize),
 		grpc.MaxSendMsgSize(maxMsgSize),
 		grpc.KeepaliveEnforcementPolicy(kaep),
-		grpc.KeepaliveParams(kasp),
+		grpc.KeepaliveParams(kaServerParams),
 	)
 	if err != nil {
 		log.Error(err)
 	}
 
 	defer func() {
-		_ = grpcsrv.Shutdown(ctx)
+		_ = grpcSrv.Shutdown(ctx)
 	}()
 
 	// Create OIDC parser
@@ -170,13 +172,13 @@ func main() {
 		LocalServiceServer:  issuergrpc.NewLocalService(),
 	}
 
-	register.RegisterGrpcHandlers(grpcsrv.Server)
+	register.RegisterGrpcHandlers(grpcSrv.Server)
 
 	// Serve gRPC server
 	log.Info("Serving gRPC on:", config.ServerGrpcHost)
 
 	go func() {
-		if err := grpcsrv.Run(ctx); err != nil {
+		if err := grpcSrv.Run(ctx); err != nil {
 			log.Fatal(err)
 		}
 	}()
@@ -185,7 +187,7 @@ func main() {
 	// This is where the gRPC-Gateway proxies the requests
 
 	//nolint:lll // Allow long line for struct
-	var kacp = keepalive.ClientParameters{
+	var kaClientParams = keepalive.ClientParameters{
 		Time: time.Duration(
 			config.ClientGrpcKeepAliveClientParametersTime,
 		) * time.Second, // Ping the client if it is idle for X seconds to ensure the connection is still active
@@ -199,7 +201,7 @@ func main() {
 		"0.0.0.0"+config.ServerGrpcHost,
 		grpc.WithTransportCredentials(insecure.NewCredentials()),
 		grpc.WithStatsHandler(otelgrpc.NewClientHandler()),
-		grpc.WithKeepaliveParams(kacp),
+		grpc.WithKeepaliveParams(kaClientParams),
 		grpc.WithDefaultCallOptions(
 			grpc.MaxCallRecvMsgSize(maxMsgSize),
 			grpc.MaxCallSendMsgSize(maxMsgSize),
@@ -213,9 +215,9 @@ func main() {
 		runtime.WithHealthzEndpoint(grpc_health_v1.NewHealthClient(conn)),
 		runtime.WithIncomingHeaderMatcher(grpcutil.CustomMatcher),
 	}
-	gwmux := runtime.NewServeMux(gwOpts...)
+	gwMux := runtime.NewServeMux(gwOpts...)
 
-	err = register.RegisterHttpHandlers(ctx, gwmux, conn)
+	err = register.RegisterHttpHandlers(ctx, gwMux, conn)
 	if err != nil {
 		log.Error(err)
 	}
@@ -246,7 +248,7 @@ func main() {
 
 	gwServer := &http.Server{
 		Addr:              config.ServerHttpHost,
-		Handler:           c.Handler(gwmux),
+		Handler:           c.Handler(gwMux),
 		WriteTimeout:      time.Duration(config.HttpServerWriteTimeout) * time.Second,
 		IdleTimeout:       time.Duration(config.HttpServerIdleTimeout) * time.Second,
 		ReadTimeout:       time.Duration(config.HttpServerReadTimeout) * time.Second,
@@ -265,9 +267,9 @@ func main() {
 		}
 	}()
 
-	interrupChannel := make(chan os.Signal, 1)
-	signal.Notify(interrupChannel, os.Interrupt)
-	<-interrupChannel
+	interruptChannel := make(chan os.Signal, 1)
+	signal.Notify(interruptChannel, os.Interrupt)
+	<-interruptChannel
 
 	log.Info("Exiting the node")
 

@@ -14,7 +14,7 @@ import (
 	issuertypes "github.com/agntcy/identity/internal/core/issuer/types"
 	vctypes "github.com/agntcy/identity/internal/core/vc/types"
 	"github.com/agntcy/identity/internal/pkg/errutil"
-	"github.com/agntcy/identity/pkg/log"
+	"github.com/agntcy/identity/internal/pkg/log"
 	"github.com/agntcy/identity/pkg/oidc"
 )
 
@@ -68,7 +68,7 @@ func (v *service) Verify(
 		)
 	}
 
-	log.Debug("Verifying proof: ", proof.ProofValue, " of type: ", proof.Type)
+	log.FromContext(ctx).Debug("Verifying proof: ", proof.ProofValue, " of type: ", proof.Type)
 
 	// Check the proof type
 	if !proof.IsJWT() {
@@ -100,14 +100,18 @@ func (v *service) Verify(
 		return nil, errutil.ErrInfo(errtypes.ERROR_REASON_INVALID_PROOF, err.Error(), err)
 	}
 
-	log.Debug("Verifying common name:", issuer.CommonName)
+	log.FromContext(ctx).Debug("Verifying common name:", issuer.CommonName)
 
 	// Verify common name is the same as the issuer's hostname
 	if parsedJWT.CommonName != issuer.CommonName {
-		return nil, errutil.Err(nil, "common name does not match issuer")
+		return nil, errutil.ErrInfo(
+			errtypes.ERROR_REASON_INVALID_ISSUER,
+			"common name does not match issuer",
+			nil,
+		)
 	}
 
-	log.Debug("Common name verified successfully")
+	log.FromContext(ctx).Debug("Common name verified successfully")
 
 	verified := parsedJWT.Provider != oidc.SelfProviderName
 
@@ -132,7 +136,7 @@ func (v *service) VerifyExistingIssuer(
 		)
 	}
 
-	log.Debug("Verifying proof: ", proof.ProofValue, " of type: ", proof.Type)
+	log.FromContext(ctx).Debug("Verifying proof: ", proof.ProofValue, " of type: ", proof.Type)
 
 	if !proof.IsJWT() {
 		return nil, errutil.ErrInfo(

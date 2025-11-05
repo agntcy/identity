@@ -9,7 +9,7 @@ import (
 	"crypto/sha256"
 	"encoding/gob"
 
-	"github.com/agntcy/identity/pkg/log"
+	"github.com/agntcy/identity/internal/pkg/log"
 	"github.com/eko/gocache/lib/v4/cache"
 )
 

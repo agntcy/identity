@@ -115,7 +115,7 @@ func (cmd *RegisterCommand) Run(ctx context.Context, flags *RegisterFlags) error
 		// extract the root url from the issuer URL as the common name
 		commonName = httputil.Hostname(flags.IssuerURL)
 		if commonName == "" {
-			return fmt.Errorf("error extracting common name from issuer URL: %w", err)
+			return fmt.Errorf("error extracting common name from issuer URL")
 		}
 
 		id = flags.ClientID

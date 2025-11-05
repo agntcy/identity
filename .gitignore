@@ -74,3 +74,4 @@ badge.json
 vcs.json
 identity
 !identity/
+/.run/

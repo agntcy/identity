@@ -11,7 +11,7 @@ import (
 
 	internalIssuerConstants "github.com/agntcy/identity/internal/issuer/constants"
 	"github.com/agntcy/identity/internal/issuer/vault/data"
-	types "github.com/agntcy/identity/internal/issuer/vault/types"
+	"github.com/agntcy/identity/internal/issuer/vault/types"
 )
 
 type vaultFilesystemRepository struct{}

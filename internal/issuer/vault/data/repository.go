@@ -4,7 +4,7 @@
 package data
 
 import (
-	types "github.com/agntcy/identity/internal/issuer/vault/types"
+	"github.com/agntcy/identity/internal/issuer/vault/types"
 )
 
 type VaultRepository interface {

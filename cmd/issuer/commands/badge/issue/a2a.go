@@ -10,7 +10,7 @@ import (
 
 	clicache "github.com/agntcy/identity/cmd/issuer/cache"
 	vctypes "github.com/agntcy/identity/internal/core/vc/types"
-	badge "github.com/agntcy/identity/internal/issuer/badge"
+	"github.com/agntcy/identity/internal/issuer/badge"
 	"github.com/agntcy/identity/internal/issuer/vault"
 	"github.com/agntcy/identity/internal/pkg/cmdutil"
 	"github.com/spf13/cobra"

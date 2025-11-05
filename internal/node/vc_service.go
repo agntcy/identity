@@ -18,7 +18,7 @@ import (
 	vccore "github.com/agntcy/identity/internal/core/vc"
 	vctypes "github.com/agntcy/identity/internal/core/vc/types"
 	"github.com/agntcy/identity/internal/pkg/errutil"
-	"github.com/agntcy/identity/pkg/log"
+	"github.com/agntcy/identity/internal/pkg/log"
 )
 
 type VerifiableCredentialService interface {
@@ -85,7 +85,7 @@ func (s *verifiableCredentialService) Publish(
 		)
 	}
 
-	log.Debug("Validating the authentication proof")
+	log.FromContext(ctx).Debug("Validating the authentication proof")
 
 	issuerVerification, err := s.verifService.VerifyExistingIssuer(ctx, proof)
 	if err != nil {
@@ -100,7 +100,7 @@ func (s *verifiableCredentialService) Publish(
 		)
 	}
 
-	log.Debug("Storing the Verifiable Credential")
+	log.FromContext(ctx).Debug("Storing the Verifiable Credential")
 
 	_, err = s.vcRepository.Create(ctx, parsedVC, id)
 	if err != nil {
@@ -118,7 +118,7 @@ func (s *verifiableCredentialService) GetVcs(
 	ctx context.Context,
 	resolverMetadataID string,
 ) ([]*vctypes.EnvelopedCredential, error) {
-	log.Debug(
+	log.FromContext(ctx).Debug(
 		"Retrieving well-known verifiable credentials for resolver metadata ID: ",
 		resolverMetadataID,
 	)
@@ -126,7 +126,7 @@ func (s *verifiableCredentialService) GetVcs(
 	vcs, err := s.vcRepository.GetByResolverMetadata(ctx, resolverMetadataID)
 	if err != nil {
 		if errors.Is(err, errcore.ErrResourceNotFound) {
-			log.Debug(
+			log.FromContext(ctx).Debug(
 				"No well-known verifiable credentials found for resolver metadata ID ",
 				resolverMetadataID,
 			)
@@ -141,7 +141,7 @@ func (s *verifiableCredentialService) GetVcs(
 		)
 	}
 
-	log.Debug(
+	log.FromContext(ctx).Debug(
 		"Found well-known verifiable credentials for resolver metadata ID ",
 		resolverMetadataID,
 	)
@@ -150,17 +150,17 @@ func (s *verifiableCredentialService) GetVcs(
 
 	for _, cred := range vcs {
 		if cred.Proof == nil {
-			log.Debug("Skipping credential with empty proof for ID: ", cred.ID)
+			log.FromContext(ctx).Debug("Skipping credential with empty proof for ID: ", cred.ID)
 			continue
 		}
 
 		if cred.Proof.Type == "" {
-			log.Debug("Skipping credential with empty proof type for ID: ", cred.ID)
+			log.FromContext(ctx).Debug("Skipping credential with empty proof type for ID: ", cred.ID)
 			continue
 		}
 
 		if cred.Proof.ProofValue == "" {
-			log.Debug("Skipping credential with empty proof value for ID: ", cred.ID)
+			log.FromContext(ctx).Debug("Skipping credential with empty proof value for ID: ", cred.ID)
 			continue
 		}
 
@@ -171,7 +171,7 @@ func (s *verifiableCredentialService) GetVcs(
 				Value:        cred.Proof.ProofValue,
 			})
 		default:
-			log.Debug(
+			log.FromContext(ctx).Debug(
 				"Skipping credential with unsupported proof type: ",
 				cred.Proof.Type,
 				" for ID: ",
@@ -252,7 +252,7 @@ func (s *verifiableCredentialService) verifyEnvelopedCredential(
 		)
 	}
 
-	log.Debug("Resolving the ID into a ResolverMetadata")
+	log.FromContext(ctx).Debug("Resolving the ID into a ResolverMetadata")
 
 	resolverMD, err := s.idRepository.ResolveID(ctx, id)
 	if err != nil {
@@ -267,7 +267,7 @@ func (s *verifiableCredentialService) verifyEnvelopedCredential(
 		return nil, nil, errutil.ErrInfo(errtypes.ERROR_REASON_INTERNAL, "unexpected error", err)
 	}
 
-	log.Debug("Validating the verifiable credential")
+	log.FromContext(ctx).Debug("Validating the verifiable credential")
 
 	err = vccore.VerifyEnvelopedCredential(credential, resolverMD.GetJwks(), checkStatus)
 
@@ -293,7 +293,7 @@ func (s *verifiableCredentialService) Revoke(
 		)
 	}
 
-	log.Debug("Validating the authentication proof")
+	log.FromContext(ctx).Debug("Validating the authentication proof")
 
 	issuerVerification, err := s.verifService.VerifyExistingIssuer(ctx, proof)
 	if err != nil {
@@ -341,7 +341,7 @@ func (s *verifiableCredentialService) Revoke(
 		}
 	}
 
-	log.Debug("Storing the Verifiable Credential")
+	log.FromContext(ctx).Debug("Storing the Verifiable Credential")
 
 	_, err = s.vcRepository.Update(ctx, parsedVC, id)
 	if err != nil {

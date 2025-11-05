@@ -6,15 +6,16 @@ package oidc
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/url"
 	"strings"
 	"time"
 
 	identitycache "github.com/agntcy/identity/internal/pkg/cache"
-	"github.com/agntcy/identity/internal/pkg/errutil"
 	"github.com/agntcy/identity/internal/pkg/httputil"
-	"github.com/agntcy/identity/pkg/log"
-	freecache "github.com/coocood/freecache"
+	"github.com/agntcy/identity/internal/pkg/log"
+	"github.com/coocood/freecache"
 	"github.com/eko/gocache/lib/v4/cache"
 	"github.com/eko/gocache/lib/v4/store"
 	freecache_store "github.com/eko/gocache/store/freecache/v4"
@@ -95,10 +96,7 @@ func NewParser() Parser {
 
 func (p *parser) VerifyJwt(ctx context.Context, parsedJwt *ParsedJWT) error {
 	if parsedJwt == nil {
-		return errutil.Err(
-			nil,
-			"the jwt provided is nil or was parsed incorrectly",
-		)
+		return errors.New("the jwt provided is nil or was parsed incorrectly")
 	}
 
 	var err error
@@ -109,14 +107,14 @@ func (p *parser) VerifyJwt(ctx context.Context, parsedJwt *ParsedJWT) error {
 		// Get the JWKS from the issuer
 		jwks, err = p.getJwks(ctx, parsedJwt.providerMetadata)
 		if err != nil {
-			return errutil.Err(err, "failed to get JWKS from issuer")
+			return fmt.Errorf("failed to get JWKS from issuer: %w", err)
 		}
 	} else {
 		log.Debug("Using issuer's self generated JWKS")
 
 		key, err := jwk.ParseKey([]byte(parsedJwt.Claims.SubJWK))
 		if err != nil {
-			return errutil.Err(err, "failed to parse JWKS")
+			return fmt.Errorf("failed to parse JWKS: %w", err)
 		}
 
 		jwks = jwk.NewSet()
@@ -137,7 +135,7 @@ func (p *parser) ParseJwt(
 	jwtString *string,
 ) (*ParsedJWT, error) {
 	if jwtString == nil || *jwtString == "" {
-		return nil, errutil.Err(nil, "JWT string is empty")
+		return nil, errors.New("JWT string is empty")
 	}
 
 	claims, err := p.GetClaims(ctx, jwtString)
@@ -199,17 +197,17 @@ func (p *parser) GetClaims(
 		jwt.WithAcceptableSkew(defaultAcceptableSkew),
 	)
 	if err != nil {
-		return nil, errutil.Err(err, "failed to parse JWT")
+		return nil, fmt.Errorf("failed to parse JWT: %w", err)
 	}
 
 	issuer, ok := jwtToken.Issuer()
 	if !ok {
-		return nil, errutil.Err(nil, "failed to decode JWT: missing 'iss' claim")
+		return nil, errors.New("failed to decode JWT: missing 'iss' claim")
 	}
 
 	subject, ok := jwtToken.Subject()
 	if !ok {
-		return nil, errutil.Err(nil, "failed to decode JWT: missing 'sub' claim")
+		return nil, errors.New("failed to decode JWT: missing 'sub' claim")
 	}
 
 	var subJWK map[string]any
@@ -220,7 +218,7 @@ func (p *parser) GetClaims(
 	if err == nil {
 		jsonSubJWK, err = json.Marshal(subJWK)
 		if err != nil {
-			return nil, errutil.Err(err, "failed to decode JWT: invalid 'sub_jwk' claim")
+			return nil, fmt.Errorf("failed to decode JWT: invalid 'sub_jwk' claim: %w", err)
 		}
 	}
 
@@ -250,12 +248,12 @@ func (p *parser) getJwks(ctx context.Context, provider *providerMetadata) (jwk.S
 
 	err := httputil.GetWithRawBody(ctx, provider.JWKSURL, nil, &jwksString)
 	if err != nil {
-		return nil, errutil.Err(err, "failed to get JWKS from issuer")
+		return nil, fmt.Errorf("failed to get JWKS from issuer: %w", err)
 	}
 
 	jwks, err := p.parseJwks(&jwksString)
 	if err != nil {
-		return nil, errutil.Err(err, "failed to parse JWKS")
+		return nil, fmt.Errorf("failed to parse JWKS: %w", err)
 	}
 
 	err = identitycache.AddToCache(ctx, p.jwksCache, provider.Issuer, &CachedJwks{Jwks: jwksString})
@@ -268,12 +266,12 @@ func (p *parser) getJwks(ctx context.Context, provider *providerMetadata) (jwk.S
 
 func (p *parser) parseJwks(jwksString *string) (jwk.Set, error) {
 	if jwksString == nil || *jwksString == "" {
-		return nil, errutil.Err(nil, "JWKS string is empty")
+		return nil, errors.New("JWKS string is empty")
 	}
 
 	jwks, err := jwk.Parse([]byte(*jwksString))
 	if err != nil {
-		return nil, errutil.Err(err, "failed to parse JWKS")
+		return nil, fmt.Errorf("failed to parse JWKS: %w", err)
 	}
 
 	return jwks, nil
