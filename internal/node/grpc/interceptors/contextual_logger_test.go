@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	"github.com/agntcy/identity/internal/node/grpc/interceptors"
+	"github.com/agntcy/identity/internal/pkg/identitycontext"
 	"github.com/agntcy/identity/internal/pkg/log"
 	"github.com/google/uuid"
 	"github.com/sirupsen/logrus"
@@ -15,6 +16,43 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/metadata"
 )
+
+func TestContextualLoggerUnary_should_enrich_with_identity_context(t *testing.T) {
+	t.Parallel()
+
+	ctx := context.Background()
+
+	testCases := map[string]*struct {
+		ctx         context.Context //nolint:containedctx // essential part of the test case
+		field       string
+		expectedVal string
+	}{
+		"request id": {
+			ctx:         identitycontext.InsertRequestID(ctx, "reqID"),
+			field:       "request_id",
+			expectedVal: "reqID",
+		},
+	}
+
+	for tn, tc := range testCases {
+		t.Run(tn, func(t *testing.T) {
+			t.Parallel()
+
+			handlerWithAssertion := func(ctx context.Context, req any) (any, error) {
+				assert.Equal(t, tc.expectedVal, log.FromContext(ctx).Data[tc.field])
+
+				return "", nil
+			}
+
+			_, _ = interceptors.ContextualLoggerUnary(
+				tc.ctx,
+				nil,
+				&grpc.UnaryServerInfo{},
+				handlerWithAssertion,
+			)
+		})
+	}
+}
 
 func TestContextualLoggerUnary_should_enrich_with_grpc_request(t *testing.T) {
 	t.Parallel()
