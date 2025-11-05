@@ -1,0 +1,15 @@
+---
+all: false
+dir: '{{.InterfaceDir}}/mocks'
+structname: '{{.InterfaceName}}'
+filename: "{{.InterfaceName | snakecase}}.go"
+pkgname: mocks
+template: testify
+template-data:
+  unroll-variadic: true
+packages:
+  github.com/agntcy/identity/internal/node:
+    interfaces:
+      IdService: {}
+      IssuerService: {}
+      VerifiableCredentialService: {}

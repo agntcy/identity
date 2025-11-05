@@ -33,3 +33,7 @@ type Configuration struct {
 	HttpServerReadHeaderTimeout                             int           `split_words:"true" default:"100"`
 	DefaultCallTimeout                                      time.Duration `split_words:"true" default:"10000ms"`
 }
+
+func (c *Configuration) IsProd() bool {
+	return c.GoEnv == "production"
+}

@@ -24,15 +24,10 @@ type VerifyService interface {
 }
 
 type verifyService struct {
-	nodeClientPrv nodeapi.ClientProvider
 }
 
-func NewVerifyService(
-	nodeClientPrv nodeapi.ClientProvider,
-) VerifyService {
-	return &verifyService{
-		nodeClientPrv: nodeClientPrv,
-	}
+func NewVerifyService() VerifyService {
+	return &verifyService{}
 }
 
 func (v *verifyService) VerifyCredential(

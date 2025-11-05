@@ -48,6 +48,7 @@ func TestValidatePubKey_NilOrEmptyFields(t *testing.T) {
 
 	// Test nil Jwk pointer
 	var nilJwk *jwk.Jwk
+
 	err := joseutil.ValidatePubKey(nilJwk)
 	assert.Error(t, err, "ValidatePubKey should fail if Jwk is nil")
 
@@ -108,6 +109,7 @@ func TestSignAndVerifyErrors(t *testing.T) {
 	// Generate a key
 	priv, err := joseutil.GenerateJWK("RS256", "sig", "")
 	assert.NoError(t, err, "GenerateJWK failed")
+
 	publicKey := priv.PublicKey()
 
 	// Test nil keys

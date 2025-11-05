@@ -19,6 +19,7 @@ import (
 	issuergrpc "github.com/agntcy/identity/internal/issuer/grpc"
 	"github.com/agntcy/identity/internal/node"
 	nodegrpc "github.com/agntcy/identity/internal/node/grpc"
+	"github.com/agntcy/identity/internal/node/grpc/interceptors"
 	"github.com/agntcy/identity/internal/pkg/grpcutil"
 	"github.com/agntcy/identity/pkg/cmd"
 	"github.com/agntcy/identity/pkg/db"
@@ -48,6 +49,11 @@ func main() {
 	config, err := cmd.GetConfiguration[Configuration]()
 	if err != nil {
 		log.WithFields(logrus.Fields{log.ErrorField: err}).Fatal("failed to start")
+	}
+
+	if config == nil {
+		log.Error("config is nil")
+		os.Exit(1)
 	}
 
 	// Configure log level
@@ -114,10 +120,13 @@ func main() {
 		}
 	}()
 
+	// Unhandled errors interceptor
+	errorInterceptor := interceptors.NewErrorInterceptor(config.IsProd())
+
 	// Create a GRPC server
 	grpcsrv, err := grpcserver.New(
 		config.ServerGrpcHost,
-		grpc.ChainUnaryInterceptor(),
+		grpc.ChainUnaryInterceptor(errorInterceptor.Unary),
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 		grpc.MaxRecvMsgSize(maxMsgSize),
 		grpc.MaxSendMsgSize(maxMsgSize),
@@ -146,7 +155,6 @@ func main() {
 	idGenerator := node.NewIDGenerator(verificationService)
 	nodeIdService := node.NewIdService(
 		idRepository,
-		issuerRepository,
 		idGenerator,
 	)
 	nodeVcService := node.NewVerifiableCredentialService(
@@ -168,7 +176,7 @@ func main() {
 	log.Info("Serving gRPC on:", config.ServerGrpcHost)
 
 	go func() {
-		if err := grpcsrv.Run(); err != nil {
+		if err := grpcsrv.Run(ctx); err != nil {
 			log.Fatal(err)
 		}
 	}()
@@ -233,6 +241,7 @@ func main() {
 	if config.GoEnv != "development" {
 		options.Debug = false
 	}
+
 	c := cors.New(options)
 
 	gwServer := &http.Server{

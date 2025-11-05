@@ -12,7 +12,6 @@ import (
 	errtypes "github.com/agntcy/identity/internal/core/errors/types"
 	idcore "github.com/agntcy/identity/internal/core/id"
 	idtypes "github.com/agntcy/identity/internal/core/id/types"
-	issuercore "github.com/agntcy/identity/internal/core/issuer"
 	issuertypes "github.com/agntcy/identity/internal/core/issuer/types"
 	vctypes "github.com/agntcy/identity/internal/core/vc/types"
 	"github.com/agntcy/identity/internal/pkg/errutil"
@@ -33,20 +32,17 @@ type IdService interface {
 }
 
 type idService struct {
-	idRepository     idcore.IdRepository
-	issuerRepository issuercore.Repository
-	idGenerator      IDGenerator
+	idRepository idcore.IdRepository
+	idGenerator  IDGenerator
 }
 
 func NewIdService(
 	idRepository idcore.IdRepository,
-	issuerRepository issuercore.Repository,
 	idGenerator IDGenerator,
 ) IdService {
 	return &idService{
-		idRepository:     idRepository,
-		issuerRepository: issuerRepository,
-		idGenerator:      idGenerator,
+		idRepository: idRepository,
+		idGenerator:  idGenerator,
 	}
 }
 
@@ -130,7 +126,7 @@ func (s *idService) checkUniqueID(ctx context.Context, id string) error {
 	if err != nil && !errors.Is(err, errcore.ErrResourceNotFound) {
 		return errutil.ErrInfo(
 			errtypes.ERROR_REASON_INTERNAL,
-			"unable to verify the uniquness of the ID",
+			"unable to verify the uniqueness of the ID",
 			err,
 		)
 	}

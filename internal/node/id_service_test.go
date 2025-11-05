@@ -42,7 +42,7 @@ func TestGenerateID_Should_Not_Return_Errors(t *testing.T) {
 			oidctesting.NewFakeParser(jwt, nil),
 			issuerRepo,
 		))
-	sut := node.NewIdService(idRepo, issuerRepo, idGen)
+	sut := node.NewIdService(idRepo, idGen)
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
 		Organization: "Some Org",
@@ -74,7 +74,7 @@ func TestGenerateID_Should_Not_Return_Error_With_Self_Provider(t *testing.T) {
 			issuerRepo,
 		),
 	)
-	sut := node.NewIdService(idRepo, issuerRepo, idGen)
+	sut := node.NewIdService(idRepo, idGen)
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
 		Organization: "Some Org",
@@ -106,7 +106,7 @@ func TestGenerateID_Should_Return_Error_With_Idp_And_Self_Proof(t *testing.T) {
 			issuerRepo,
 		),
 	)
-	sut := node.NewIdService(idRepo, issuerRepo, idGen)
+	sut := node.NewIdService(idRepo, idGen)
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
 		Organization: "Some Org",
@@ -126,7 +126,7 @@ func TestGenerateID_Should_Return_Invalid_Proof_If_Empty(t *testing.T) {
 
 	oidcParser := oidctesting.NewFakeParser(&oidc.ParsedJWT{}, nil)
 	idGen := node.NewIDGenerator(issuerverif.NewService(oidcParser, nil))
-	sut := node.NewIdService(nil, nil, idGen)
+	sut := node.NewIdService(nil, idGen)
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
 		Organization: "Some Org",
@@ -146,7 +146,7 @@ func TestGenerateID_Should_Return_Invalid_Proof_Error(t *testing.T) {
 			nil,
 		),
 	)
-	sut := node.NewIdService(nil, nil, idGen)
+	sut := node.NewIdService(nil, idGen)
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
 		Organization: "Some Org",
@@ -176,7 +176,7 @@ func TestGenerateID_Should_Return_Invalid_Issuer_Error(t *testing.T) {
 		),
 	)
 	idRepo := idtesting.NewFakeIdRepository()
-	sut := node.NewIdService(idRepo, issuerRepo, idGen)
+	sut := node.NewIdService(idRepo, idGen)
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
 		Organization: "Some Org",
@@ -205,7 +205,7 @@ func TestGenerateID_Should_Return_Unregistred_Issuer_Error(t *testing.T) {
 			issuerRepo,
 		),
 	)
-	sut := node.NewIdService(nil, issuerRepo, idGen)
+	sut := node.NewIdService(nil, idGen)
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
 		Organization: "Some Org",
@@ -236,7 +236,7 @@ func TestGenerateID_Should_Return_ID_Already_Exists_Error(t *testing.T) {
 			issuerRepo,
 		),
 	)
-	sut := node.NewIdService(idRepo, nil, idGen)
+	sut := node.NewIdService(idRepo, idGen)
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
 		Organization: "Some Org",
@@ -262,7 +262,7 @@ func TestResolveID_Should_Return_Resolver_Metadata(t *testing.T) {
 	}
 
 	idRepo := idtesting.NewFakeIdRepository()
-	sut := node.NewIdService(idRepo, nil, nil)
+	sut := node.NewIdService(idRepo, nil)
 	md := &idtypes.ResolverMetadata{
 		ID: "SOME_ID",
 	}
@@ -277,7 +277,7 @@ func TestResolveID_Should_Return_Resolver_Metadata_Not_Found_Error(t *testing.T)
 	t.Parallel()
 
 	idRepo := idtesting.NewFakeIdRepository()
-	sut := node.NewIdService(idRepo, nil, nil)
+	sut := node.NewIdService(idRepo, nil)
 
 	_, err := sut.Resolve(context.Background(), "SOME_ID")
 

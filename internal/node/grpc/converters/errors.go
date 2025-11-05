@@ -16,6 +16,6 @@ func FromErrorInfo(src *errtypes.ErrorInfo) *coreapi.ErrorInfo {
 
 	return &coreapi.ErrorInfo{
 		Reason:  ptrutil.Ptr(coreapi.ErrorReason(src.Reason)),
-		Message: ptrutil.Ptr(src.Message),
+		Message: &src.Message,
 	}
 }

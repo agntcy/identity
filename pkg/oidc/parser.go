@@ -102,6 +102,7 @@ func (p *parser) VerifyJwt(ctx context.Context, parsedJwt *ParsedJWT) error {
 	}
 
 	var err error
+
 	var jwks jwk.Set
 
 	if parsedJwt.Provider != SelfProviderName {
@@ -147,7 +148,9 @@ func (p *parser) ParseJwt(
 	log.Debug("Validating JWT for issuer:", claims.Issuer, " and subject:", claims.Subject)
 
 	var providerName ProviderName
+
 	var commonName string
+
 	var providerMD *providerMetadata
 
 	selfIssued, err := p.isSelfIssuedToken(claims)
@@ -210,6 +213,7 @@ func (p *parser) GetClaims(
 	}
 
 	var subJWK map[string]any
+
 	var jsonSubJWK []byte
 
 	err = jwtToken.Get(SelfIssuedTokenSubJwkClaimName, &subJWK)

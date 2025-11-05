@@ -93,7 +93,7 @@ The Identity CLI tool is a command line interface for generating, publishing and
 		nodeClientPrv,
 		authClient,
 	)
-	verifyService := verify.NewVerifyService(nodeClientPrv)
+	verifyService := verify.NewVerifyService()
 
 	rootCmd.AddCommand(vaultcmd.NewCmd(cache, vaultService))
 	rootCmd.AddCommand(issuercmd.NewCmd(cache, issuerService, vaultService))

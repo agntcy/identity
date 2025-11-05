@@ -90,3 +90,12 @@ func IsErrorInfo(err error, reason ErrorReason) bool {
 
 	return false
 }
+
+func AsErrorInfo(err error) *ErrorInfo {
+	var errInfo ErrorInfo
+	if errors.As(err, &errInfo) {
+		return &errInfo
+	}
+
+	return nil
+}

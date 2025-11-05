@@ -19,6 +19,7 @@ func tempFilePath() string {
 	if err != nil {
 		panic(err)
 	}
+
 	path := f.Name()
 	f.Close()
 	os.Remove(path)
