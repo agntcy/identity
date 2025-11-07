@@ -36,7 +36,7 @@ func (d *discoveryClient) Discover(
 	// We only support streamable http client for now
 	mcpClient, err := client.NewStreamableHttpClient(fmt.Sprintf("%s/mcp", url))
 	if err != nil {
-		return nil, fmt.Errorf("failed to create mcp client: %w", err)
+		return nil, fmt.Errorf("failed to create MCP client: %w", err)
 	}
 
 	// Initialize the client
@@ -45,9 +45,9 @@ func (d *discoveryClient) Discover(
 		return nil, fmt.Errorf("failed to initialize mcp client: %w", err)
 	}
 
-	defer func(mcpClient *client.Client) {
+	defer func() {
 		_ = mcpClient.Close()
-	}(mcpClient)
+	}()
 
 	// Discover MCP server
 	// First the tools

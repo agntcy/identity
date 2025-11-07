@@ -43,30 +43,32 @@ func SetLogLevel(aLogLevel string) {
 	logrus.SetLevel(logLevel)
 }
 
-// Info : Configure log level
+// Info logs a message at level Info
 func Info(args ...any) {
 	logrus.Info(args...)
 }
 
-// Debug : Configure log level
+// Debug Info logs a message at level Debug
 func Debug(args ...any) {
 	logrus.Debug(args...)
 }
 
-// Fatal : Configure log level
+// Fatal logs a message at level Fatal then the process will exit with status set to 1
 func Fatal(args ...any) {
 	logrus.Fatal(args...)
 }
 
-// Error : Configure log level
+// Error logs a message at level Error
 func Error(args ...any) {
 	logrus.Error(args...)
 }
 
+// Warn logs a message at level Warn
 func Warn(args ...any) {
 	logrus.Warn(args...)
 }
 
+// WithError creates an entry from the standard logger and adds an error field to it
 func WithError(err error) *logrus.Entry {
 	return logrus.WithError(err)
 }
