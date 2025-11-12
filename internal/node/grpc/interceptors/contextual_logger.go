@@ -7,6 +7,7 @@ import (
 	"context"
 	"maps"
 
+	"github.com/agntcy/identity/internal/pkg/identitycontext"
 	"github.com/agntcy/identity/internal/pkg/log"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -27,6 +28,10 @@ func ContextualLoggerUnary(
 	handler grpc.UnaryHandler,
 ) (any, error) {
 	fields := make(logrus.Fields)
+
+	if requestID, ok := identitycontext.GetRequestID(ctx); ok {
+		fields["request_id"] = requestID
+	}
 
 	fields["full_method"] = info.FullMethod
 
