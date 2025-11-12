@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/agntcy/identity/pkg/log"
+	"github.com/agntcy/identity/internal/pkg/log"
 )
 
 // Timeout : API timeout time

@@ -10,8 +10,7 @@ import (
 
 	errtypes "github.com/agntcy/identity/internal/core/errors/types"
 	"github.com/agntcy/identity/internal/pkg/grpcutil"
-	"github.com/agntcy/identity/pkg/log"
-	"github.com/sirupsen/logrus"
+	"github.com/agntcy/identity/internal/pkg/log"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 )
@@ -36,23 +35,23 @@ func (i ErrorInterceptor) Unary(
 	if err != nil {
 		// if it's a gRPC Status error then return it
 		if _, ok := status.FromError(err); ok {
-			log.WithFields(logrus.Fields{log.ErrorField: err}).Debug(err.Error())
+			log.FromContext(ctx).WithError(err).Debug(err.Error())
 
 			return resp, err
 		}
 
 		if errInfo := errtypes.AsErrorInfo(err); errInfo != nil {
-			return resp, i.internalError(fmt.Errorf("%s: %w", errInfo.Message, errInfo.Err))
+			return resp, i.internalError(ctx, fmt.Errorf("%s: %w", errInfo.Message, errInfo.Err))
 		}
 
-		return resp, i.internalError(err)
+		return resp, i.internalError(ctx, err)
 	}
 
 	return resp, err
 }
 
-func (i ErrorInterceptor) internalError(err error) error {
-	log.WithFields(logrus.Fields{log.ErrorField: err}).Error("unexpected error")
+func (i ErrorInterceptor) internalError(ctx context.Context, err error) error {
+	log.FromContext(ctx).WithError(err).Error("unexpected error")
 
 	var finalErr error
 

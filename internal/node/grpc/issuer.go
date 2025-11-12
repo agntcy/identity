@@ -9,8 +9,8 @@ import (
 	nodeapi "github.com/agntcy/identity/api/server/agntcy/identity/node/v1alpha1"
 	"github.com/agntcy/identity/internal/node"
 	"github.com/agntcy/identity/internal/node/grpc/converters"
-	grpcutil "github.com/agntcy/identity/internal/pkg/grpcutil"
-	"github.com/agntcy/identity/pkg/log"
+	"github.com/agntcy/identity/internal/pkg/grpcutil"
+	"github.com/agntcy/identity/internal/pkg/log"
 )
 
 type issuerService struct {
@@ -28,7 +28,7 @@ func (i *issuerService) Register(
 	ctx context.Context,
 	req *nodeapi.RegisterIssuerRequest,
 ) (*nodeapi.RegisterIssuerResponse, error) {
-	log.Debug("RegisterIssuer: ", req.Issuer.CommonName)
+	log.FromContext(ctx).Debug("RegisterIssuer: ", req.Issuer.CommonName)
 
 	// Convert entities and call the node service
 	err := i.nodeIssuerService.Register(
@@ -50,7 +50,7 @@ func (i *issuerService) GetWellKnown(
 	ctx context.Context,
 	req *nodeapi.GetIssuerWellKnownRequest,
 ) (*nodeapi.GetIssuerWellKnownResponse, error) {
-	log.Debug("GetIssuerWellKnown: ", req.CommonName)
+	log.FromContext(ctx).Debug("GetIssuerWellKnown: ", req.CommonName)
 
 	// Get the issuer's public keys by common name
 	jwks, err := i.nodeIssuerService.GetJwks(ctx, req.CommonName)

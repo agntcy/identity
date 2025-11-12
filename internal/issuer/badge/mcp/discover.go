@@ -9,7 +9,6 @@ import (
 	"fmt"
 
 	mcptypes "github.com/agntcy/identity/internal/issuer/badge/mcp/types"
-	"github.com/agntcy/identity/internal/pkg/errutil"
 	"github.com/mark3labs/mcp-go/client"
 	"github.com/mark3labs/mcp-go/mcp"
 )
@@ -33,26 +32,22 @@ func (d *discoveryClient) Discover(
 	ctx context.Context,
 	name, url string,
 ) (*mcptypes.McpServer, error) {
-	// Create streameable http client
+	// Create streamable http client
 	// We only support streamable http client for now
 	mcpClient, err := client.NewStreamableHttpClient(fmt.Sprintf("%s/mcp", url))
 	if err != nil {
-		return nil, errutil.Err(
-			err,
-			"failed to create mcp client",
-		)
+		return nil, fmt.Errorf("failed to create MCP client: %w", err)
 	}
 
 	// Initialize the client
 	_, err = mcpClient.Initialize(ctx, mcp.InitializeRequest{})
 	if err != nil {
-		return nil, errutil.Err(
-			err,
-			"failed to initialize mcp client",
-		)
+		return nil, fmt.Errorf("failed to initialize mcp client: %w", err)
 	}
 
-	defer mcpClient.Close()
+	defer func() {
+		_ = mcpClient.Close()
+	}()
 
 	// Discover MCP server
 	// First the tools
@@ -60,10 +55,7 @@ func (d *discoveryClient) Discover(
 
 	toolsList, err := mcpClient.ListTools(ctx, toolsRequest)
 	if err != nil {
-		return nil, errutil.Err(
-			err,
-			"failed to discover mcp server",
-		)
+		return nil, fmt.Errorf("failed to discover mcp tools: %w", err)
 	}
 
 	// After that the resources
@@ -71,10 +63,7 @@ func (d *discoveryClient) Discover(
 
 	resourcesList, err := mcpClient.ListResources(ctx, resourcesRequest)
 	if err != nil {
-		return nil, errutil.Err(
-			err,
-			"failed to discover mcp server",
-		)
+		return nil, fmt.Errorf("failed to discover MCP resources: %w", err)
 	}
 
 	// Parse the tools and resources
@@ -94,10 +83,7 @@ func (d *discoveryClient) Discover(
 
 		err = json.Unmarshal(jsonParams, &parameters)
 		if err != nil {
-			return nil, errutil.Err(
-				err,
-				"failed to parse MCP tools",
-			)
+			return nil, fmt.Errorf("failed to parse MCP tools: %w", err)
 		}
 
 		availableTools = append(availableTools, &mcptypes.McpTool{

@@ -34,6 +34,10 @@ type Configuration struct {
 	DefaultCallTimeout                                      time.Duration `split_words:"true" default:"10000ms"`
 }
 
+func (c *Configuration) IsDev() bool {
+	return c.GoEnv == "development"
+}
+
 func (c *Configuration) IsProd() bool {
 	return c.GoEnv == "production"
 }

@@ -6,12 +6,12 @@ package postgres
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	errcore "github.com/agntcy/identity/internal/core/errors"
 	vccore "github.com/agntcy/identity/internal/core/vc"
 	"github.com/agntcy/identity/internal/core/vc/types"
-	"github.com/agntcy/identity/internal/pkg/errutil"
-	"github.com/agntcy/identity/pkg/db"
+	"github.com/agntcy/identity/internal/pkg/db"
 	"gorm.io/gorm"
 )
 
@@ -34,9 +34,7 @@ func (r *vcPostgresRepository) Create(
 
 	result := r.dbContext.Client().Create(model)
 	if result.Error != nil {
-		return nil, errutil.Err(
-			result.Error, "there was an error creating the verifiable credential",
-		)
+		return nil, fmt.Errorf("there was an error creating the verifiable credential: %w", result.Error)
 	}
 
 	return credential, nil
@@ -51,9 +49,7 @@ func (r *vcPostgresRepository) Update(
 
 	err := r.dbContext.Client().Save(model).Error
 	if err != nil {
-		return nil, errutil.Err(
-			err, "there was an error updating the verifiable credential",
-		)
+		return nil, fmt.Errorf("there was an error updating the verifiable credential: %w", err)
 	}
 
 	return credential, nil
@@ -71,9 +67,7 @@ func (r *vcPostgresRepository) GetByResolverMetadata(
 		Order("issuance_date DESC").
 		Find(&storedVCs)
 	if result.Error != nil {
-		return nil, errutil.Err(
-			result.Error, "there was an error fetching the verifiable credentials",
-		)
+		return nil, fmt.Errorf("there was an error fetching the verifiable credentials: %w", result.Error)
 	}
 
 	vcs := make([]*types.VerifiableCredential, 0, len(storedVCs))
@@ -96,9 +90,7 @@ func (r *vcPostgresRepository) GetByID(
 			return nil, errcore.ErrResourceNotFound
 		}
 
-		return nil, errutil.Err(
-			err, "there was an error fetching the verifiable credential",
-		)
+		return nil, fmt.Errorf("there was an error fetching the verifiable credential: %w", err)
 	}
 
 	return vc.ToCoreType(), nil

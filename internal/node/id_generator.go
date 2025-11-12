@@ -12,7 +12,7 @@ import (
 	issuerverification "github.com/agntcy/identity/internal/core/issuer/verification"
 	vctypes "github.com/agntcy/identity/internal/core/vc/types"
 	"github.com/agntcy/identity/internal/pkg/errutil"
-	"github.com/agntcy/identity/pkg/log"
+	"github.com/agntcy/identity/internal/pkg/log"
 	"github.com/agntcy/identity/pkg/oidc"
 )
 
@@ -75,8 +75,8 @@ func (g *idGenerator) GenerateFromProof(
 		)
 	}
 
-	log.Debug("Issuer is verified: ", verifRes.Issuer.Verified)
-	log.Debug("JWT scheme: ", scheme)
+	log.FromContext(ctx).Debug("Issuer is verified: ", verifRes.Issuer.Verified)
+	log.FromContext(ctx).Debug("JWT scheme: ", scheme)
 
 	return fmt.Sprintf("%s%s", scheme, verifRes.Subject), verifRes.Issuer, nil
 }

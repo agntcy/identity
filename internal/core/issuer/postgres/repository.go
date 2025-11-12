@@ -6,12 +6,12 @@ package postgres
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	errcore "github.com/agntcy/identity/internal/core/errors"
 	issuercore "github.com/agntcy/identity/internal/core/issuer"
 	issuertypes "github.com/agntcy/identity/internal/core/issuer/types"
-	"github.com/agntcy/identity/internal/pkg/errutil"
-	"github.com/agntcy/identity/pkg/db"
+	"github.com/agntcy/identity/internal/pkg/db"
 	"gorm.io/gorm"
 )
 
@@ -36,9 +36,7 @@ func (r *repository) CreateIssuer(
 	// Create the issuer
 	inserted := r.dbContext.Client().Create(model)
 	if inserted.Error != nil {
-		return nil, errutil.Err(
-			inserted.Error, "there was an error creating the issuer",
-		)
+		return nil, fmt.Errorf("there was an error creating the issuer: %w", inserted.Error)
 	}
 
 	return issuer, nil
@@ -58,9 +56,7 @@ func (r *repository) GetIssuer(
 			return nil, errcore.ErrResourceNotFound
 		}
 
-		return nil, errutil.Err(
-			result.Error, "there was an error fetching the issuer",
-		)
+		return nil, fmt.Errorf("there was an error fetching the issuer: %w", result.Error)
 	}
 
 	return issuer.ToCoreType(), nil

@@ -6,13 +6,14 @@ package badge
 import (
 	"context"
 	"encoding/json"
+	"errors"
+	"fmt"
 	"strings"
 
 	"github.com/agntcy/identity/internal/issuer/auth"
 	"github.com/agntcy/identity/internal/issuer/badge/data"
 	issdata "github.com/agntcy/identity/internal/issuer/issuer/data"
 	mddata "github.com/agntcy/identity/internal/issuer/metadata/data"
-	"github.com/agntcy/identity/internal/pkg/errutil"
 	"github.com/agntcy/identity/internal/pkg/nodeapi"
 	"github.com/agntcy/identity/pkg/joseutil"
 	"github.com/agntcy/identity/pkg/jwk"
@@ -87,15 +88,15 @@ func (s *badgeService) IssueBadge(
 
 	_, err = s.metadataRepository.GetMetadata(vaultId, keyId, issuerId, metadataId)
 	if err != nil {
-		return "", errutil.Err(err, "unable to fetch the metadata")
+		return "", fmt.Errorf("unable to fetch the metadata: %w", err)
 	}
 
 	if content.Type == vctypes.CREDENTIAL_CONTENT_TYPE_UNSPECIFIED {
-		return "", errutil.Err(nil, "unsupported content type")
+		return "", errors.New("unsupported content type")
 	}
 
 	if privateKey == nil {
-		return "", errutil.Err(nil, "invalid privateKey argument")
+		return "", errors.New("invalid privateKey argument")
 	}
 
 	credential, err := vc.New(
@@ -113,7 +114,7 @@ func (s *badgeService) IssueBadge(
 
 	signed, err := joseutil.Sign(privateKey, payload)
 	if err != nil {
-		return "", errutil.Err(err, "unable to sign the badge")
+		return "", fmt.Errorf("unable to sign the badge: %w", err)
 	}
 
 	envelopedCredential := vctypes.EnvelopedCredential{
@@ -150,7 +151,7 @@ func (s *badgeService) PublishBadge(
 
 	md, err := s.metadataRepository.GetMetadata(vaultId, keyId, issuerId, metadataId)
 	if err != nil {
-		return nil, errutil.Err(err, "unable to fetch the metadata")
+		return nil, fmt.Errorf("unable to fetch the metadata: %w", err)
 	}
 
 	token, err := s.authClient.Authenticate(

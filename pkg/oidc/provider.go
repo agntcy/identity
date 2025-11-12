@@ -11,9 +11,8 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/agntcy/identity/internal/pkg/errutil"
 	"github.com/agntcy/identity/internal/pkg/httputil"
-	"github.com/agntcy/identity/pkg/log"
+	"github.com/agntcy/identity/internal/pkg/log"
 )
 
 func (p *parser) detectProviderName(
@@ -98,7 +97,7 @@ func getAuthSrvMetadata(ctx context.Context, wellKnownURL string) (*providerMeta
 
 	err := httputil.GetJSON(ctx, wellKnownURL, &metadata)
 	if err != nil {
-		return nil, errutil.Err(err, "failed to get metadata from issuer")
+		return nil, fmt.Errorf("failed to get metadata from issuer: %w", err)
 	}
 
 	log.Debug("Got metadata from issuer:", metadata)
