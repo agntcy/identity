@@ -42,7 +42,7 @@ func (*mockStream) SetTrailer(_ metadata.MD) error {
 func TestRequestIDUnary(t *testing.T) {
 	t.Parallel()
 
-	t.Run("should set request ID header in gRPC stream", func(t *testing.T) {
+	t.Run("should set request ID header in gRPC stream with new value", func(t *testing.T) {
 		t.Parallel()
 
 		stream := &mockStream{}
@@ -57,6 +57,37 @@ func TestRequestIDUnary(t *testing.T) {
 			})
 
 		ctx := grpc.NewContextWithServerTransportStream(context.Background(), stream)
+
+		_, _ = interceptors.RequestIdUnary(
+			ctx,
+			"req",
+			&grpc.UnaryServerInfo{},
+			func(ctx context.Context, req any) (any, error) {
+				return "res", nil
+			},
+		)
+	})
+
+	t.Run("should re-use the request ID passed with the gRPC request", func(t *testing.T) {
+		t.Parallel()
+
+		expectedRequestID := uuid.NewString()
+		ctxWithMD := metadata.NewIncomingContext(t.Context(), map[string][]string{
+			interceptors.RequestIDHeader: {expectedRequestID},
+		})
+
+		stream := &mockStream{}
+		stream.On("SetHeader", mock.Anything).
+			Return(nil).
+			Run(func(args mock.Arguments) {
+				md, _ := args.Get(0).(metadata.MD)
+				vals := md.Get(interceptors.RequestIDHeader)
+
+				assert.Len(t, vals, 1)
+				assert.Equal(t, expectedRequestID, vals[0])
+			})
+
+		ctx := grpc.NewContextWithServerTransportStream(ctxWithMD, stream)
 
 		_, _ = interceptors.RequestIdUnary(
 			ctx,

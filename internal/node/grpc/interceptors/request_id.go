@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/textproto"
+	"strings"
 
 	"github.com/agntcy/identity/internal/pkg/identitycontext"
 	"github.com/agntcy/identity/internal/pkg/log"
@@ -30,6 +31,17 @@ func RequestIdUnary(
 	handler grpc.UnaryHandler,
 ) (any, error) {
 	requestID := uuid.NewString()
+
+	md, ok := metadata.FromIncomingContext(ctx)
+	if ok {
+		requestIDs, ok := md[strings.ToLower(RequestIDHeader)]
+		if ok && requestIDs[0] != "" {
+			requestID = requestIDs[0]
+		}
+	} else {
+		log.FromContext(ctx).Debug("failed to extract metadata from context")
+	}
+
 	ctxWithReqID := identitycontext.InsertRequestID(ctx, requestID)
 
 	resp, err := handler(ctxWithReqID, req)
