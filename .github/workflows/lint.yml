@@ -23,7 +23,7 @@ jobs:
       packages: read
       statuses: write
     steps:
-      - uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f # v4.1.7
+      - uses: actions/checkout@71cf2267d89c5cb81562390fa70a37fa40b1305e # v4.1.7
         with:
           fetch-depth: 0
           persist-credentials: false

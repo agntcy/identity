@@ -23,9 +23,9 @@ jobs:
         uses: step-security/harden-runner@ec9f2d5744a09debf3a187a3f4f675c53b671911 # v2.13.0
         with:
           egress-policy: audit
-      - uses: actions/checkout@09d2acae674a48949e3602304ab46fd20ae0c42f # v4.1.7
+      - uses: actions/checkout@71cf2267d89c5cb81562390fa70a37fa40b1305e # v4.1.7
       - name: 🔂 dependency review
-        uses: actions/dependency-review-action@da24556b548a50705dd671f47852072ea4c105d9 # v4.7.1
+        uses: actions/dependency-review-action@3c4e3dcb1aa7874d2c16be7d79418e9b7efd6261 # v4.8.2
         with:
           fail-on-severity: "high"
           deny-licenses: "AGPL-1.0, AGPL-3.0"
