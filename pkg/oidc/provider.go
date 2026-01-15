@@ -33,6 +33,8 @@ func (p *parser) detectProviderName(
 		return OktaProviderName, nil
 	case isDuo(headers, providerUrl.Host):
 		return DuoProviderName, nil
+	case isPing(headers, providerUrl.Host):
+		return PingProviderName, nil
 	default:
 		return IdpProviderName, nil
 	}
@@ -51,6 +53,13 @@ func isDuo(headers http.Header, host string) bool {
 	return headers != nil &&
 		(strings.HasPrefix(strings.ToLower(headers.Get("Server")), "duo") ||
 			strings.HasPrefix(host, "duosecurity.com"))
+}
+
+func isPing(_ http.Header, host string) bool {
+	return strings.HasSuffix(host, "pingone.com") ||
+		strings.HasSuffix(host, "pingone.eu") ||
+		strings.HasSuffix(host, "pingone.com.au") ||
+		strings.HasSuffix(host, "pingone.ca")
 }
 
 func getProviderMetadata(ctx context.Context, issuer string) (*providerMetadata, error) {

@@ -38,6 +38,7 @@ const (
 	DuoProviderName
 	OryProviderName
 	IdpProviderName
+	PingProviderName
 	SelfProviderName
 )
 
@@ -55,9 +56,11 @@ type providerMetadata struct {
 	JWKSURL  string `json:"jwks_uri"`
 }
 
-const defaultCacheSize = 10 * 1024 * 1024     // 10MB
-const defaultCacheExpiration = 24             // 24 hours
-const defaultAcceptableSkew = 5 * time.Second // 5 seconds
+const (
+	defaultCacheSize       = 10 * 1024 * 1024 // 10MB
+	defaultCacheExpiration = 24               // 24 hours
+	defaultAcceptableSkew  = 5 * time.Second  // 5 seconds
+)
 
 type CachedJwks struct {
 	Jwks string
