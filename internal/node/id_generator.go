@@ -23,6 +23,7 @@ const (
 	DuoScheme  = "DUO-"
 	OryScheme  = "ORY-"
 	IdpScheme  = "IDP-"
+	PingScheme = "PING-"
 	SelfScheme = "AGNTCY-"
 )
 
@@ -65,6 +66,8 @@ func (g *idGenerator) GenerateFromProof(
 		scheme = OryScheme
 	case oidc.IdpProviderName:
 		scheme = IdpScheme
+	case oidc.PingProviderName:
+		scheme = PingScheme
 	case oidc.SelfProviderName:
 		scheme = SelfScheme
 	default:

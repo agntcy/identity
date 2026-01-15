@@ -208,9 +208,28 @@ func (p *parser) GetClaims(
 		return nil, errors.New("failed to decode JWT: missing 'iss' claim")
 	}
 
-	subject, ok := jwtToken.Subject()
-	if !ok {
-		return nil, errors.New("failed to decode JWT: missing 'sub' claim")
+	var subOk bool
+
+	var cidError, clientIDError error
+
+	var sub, cid, clientID string
+
+	// Get the subject from 'sub', 'cid' or 'client_id' claim
+	sub, subOk = jwtToken.Subject()
+	cidError = jwtToken.Get("cid", &cid)
+	clientIDError = jwtToken.Get("client_id", &clientID)
+
+	if !subOk && cidError != nil && clientIDError != nil {
+		return nil, errors.New("failed to decode JWT: missing 'sub', 'cid' or 'client_id' claim")
+	}
+
+	subject := sub
+	if subject == "" {
+		if cidError == nil && cid != "" {
+			subject = cid
+		} else if clientIDError == nil && clientID != "" {
+			subject = clientID
+		}
 	}
 
 	var subJWK map[string]any
