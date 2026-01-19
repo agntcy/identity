@@ -125,7 +125,9 @@ func (p *parser) VerifyJwt(ctx context.Context, parsedJwt *ParsedJWT) error {
 	}
 
 	// Verify the JWT signature
-	_, err = jws.Verify([]byte(*parsedJwt.jwt), jws.WithKeySet(jwks))
+	// The algorithm is inferred from the key automatically
+	// In some providers there is no "alg" specified in the JWKS
+	_, err = jws.Verify([]byte(*parsedJwt.jwt), jws.WithKeySet(jwks, jws.WithInferAlgorithmFromKey(true)))
 	if err != nil {
 		return err
 	}
