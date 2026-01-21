@@ -19,11 +19,12 @@ import (
 // All IDP schemes supported by the ID generator.
 // The ID generator creates IDs based on the proof and issuer information.
 const (
-	OktaScheme = "OKTA-"
-	DuoScheme  = "DUO-"
-	OryScheme  = "ORY-"
-	IdpScheme  = "IDP-"
-	SelfScheme = "AGNTCY-"
+	OktaScheme  = "OKTA-"
+	DuoScheme   = "DUO-"
+	OryScheme   = "ORY-"
+	IdpScheme   = "IDP-"
+	CheqdScheme = "did:cheqd:"
+	SelfScheme  = "AGNTCY-"
 )
 
 type IDGenerator interface {
@@ -65,6 +66,8 @@ func (g *idGenerator) GenerateFromProof(
 		scheme = OryScheme
 	case oidc.IdpProviderName:
 		scheme = IdpScheme
+	case oidc.CheqdProviderName:
+		scheme = CheqdScheme
 	case oidc.SelfProviderName:
 		scheme = SelfScheme
 	default:
