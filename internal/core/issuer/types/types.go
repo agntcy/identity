@@ -24,6 +24,10 @@ const (
 	// ISSUER_AUTH_TYPE_SELF indicates that the issuer uses a self-issued key for authentication.
 	// This is typically used in scenarios where the issuer doesn't rely on an IdP.
 	ISSUER_AUTH_TYPE_SELF
+
+	// ISSUER_AUTH_TYPE_DID indicates that the issuer uses a Decentralized Identifier (DID)
+	// for authentication. The DID is resolved to obtain verification methods.
+	ISSUER_AUTH_TYPE_DID
 )
 
 // A Identity Issuer
