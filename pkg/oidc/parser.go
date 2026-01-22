@@ -38,6 +38,7 @@ const (
 	DuoProviderName
 	OryProviderName
 	IdpProviderName
+	PingProviderName
 	SelfProviderName
 )
 
@@ -55,9 +56,11 @@ type providerMetadata struct {
 	JWKSURL  string `json:"jwks_uri"`
 }
 
-const defaultCacheSize = 10 * 1024 * 1024     // 10MB
-const defaultCacheExpiration = 24             // 24 hours
-const defaultAcceptableSkew = 5 * time.Second // 5 seconds
+const (
+	defaultCacheSize       = 10 * 1024 * 1024 // 10MB
+	defaultCacheExpiration = 24               // 24 hours
+	defaultAcceptableSkew  = 5 * time.Second  // 5 seconds
+)
 
 type CachedJwks struct {
 	Jwks string
@@ -122,7 +125,9 @@ func (p *parser) VerifyJwt(ctx context.Context, parsedJwt *ParsedJWT) error {
 	}
 
 	// Verify the JWT signature
-	_, err = jws.Verify([]byte(*parsedJwt.jwt), jws.WithKeySet(jwks))
+	// The algorithm is inferred from the key automatically
+	// In some providers there is no "alg" specified in the JWKS
+	_, err = jws.Verify([]byte(*parsedJwt.jwt), jws.WithKeySet(jwks, jws.WithInferAlgorithmFromKey(true)))
 	if err != nil {
 		return err
 	}
@@ -205,9 +210,28 @@ func (p *parser) GetClaims(
 		return nil, errors.New("failed to decode JWT: missing 'iss' claim")
 	}
 
-	subject, ok := jwtToken.Subject()
-	if !ok {
-		return nil, errors.New("failed to decode JWT: missing 'sub' claim")
+	var subOk bool
+
+	var cidError, clientIDError error
+
+	var sub, cid, clientID string
+
+	// Get the subject from 'sub', 'cid' or 'client_id' claim
+	sub, subOk = jwtToken.Subject()
+	cidError = jwtToken.Get("cid", &cid)
+	clientIDError = jwtToken.Get("client_id", &clientID)
+
+	if !subOk && cidError != nil && clientIDError != nil {
+		return nil, errors.New("failed to decode JWT: missing 'sub', 'cid' or 'client_id' claim")
+	}
+
+	subject := sub
+	if subject == "" {
+		if cidError == nil && cid != "" {
+			subject = cid
+		} else if clientIDError == nil && clientID != "" {
+			subject = clientID
+		}
 	}
 
 	var subJWK map[string]any
