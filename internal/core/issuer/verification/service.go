@@ -72,6 +72,7 @@ func (v *service) Verify(
 
 	// Check the proof type
 	if !proof.IsJWT() {
+		log.FromContext(ctx).WithField("proof_type", proof.Type).Debug("Proof is not JWT")
 		return nil, errutil.ErrInfo(
 			errtypes.ERROR_REASON_UNSUPPORTED_PROOF,
 			fmt.Sprintf("unsupported proof type: %s", proof.Type),
@@ -82,6 +83,7 @@ func (v *service) Verify(
 	// Parse JWT to extract the common name and issuer information
 	parsedJWT, err := v.oidcParser.ParseJwt(ctx, &proof.ProofValue)
 	if err != nil {
+		log.FromContext(ctx).WithError(err).Error("Failed to parse JWT")
 		return nil, errutil.ErrInfo(
 			errtypes.ERROR_REASON_INVALID_PROOF,
 			err.Error(),
@@ -89,18 +91,29 @@ func (v *service) Verify(
 		)
 	}
 
+	log.FromContext(ctx).Debug("JWT parsed successfully")
+
 	if parsedJWT.Provider == oidc.SelfProviderName {
 		// We make sure we always use the Issuer's public key to verify the JWT
 		parsedJWT.Claims.SubJWK = string(issuer.PublicKey.ToJSON())
+		log.FromContext(ctx).Debug("Using issuer's public key for self-signed JWT")
 	}
+
+	log.FromContext(ctx).Debug("Verifying JWT signature")
 
 	// Verify the JWT signature
 	err = v.oidcParser.VerifyJwt(ctx, parsedJWT)
 	if err != nil {
+		log.FromContext(ctx).WithError(err).Error("JWT signature verification failed")
 		return nil, errutil.ErrInfo(errtypes.ERROR_REASON_INVALID_PROOF, err.Error(), err)
 	}
 
-	log.FromContext(ctx).Debug("Verifying common name:", issuer.CommonName)
+	log.FromContext(ctx).Debug("JWT signature verified successfully")
+
+	log.FromContext(ctx).
+		WithField("parsed_common_name", parsedJWT.CommonName).
+		WithField("expected_common_name", issuer.CommonName).
+		Debug("Comparing common names")
 
 	// Verify common name is the same as the issuer's hostname
 	if parsedJWT.CommonName != issuer.CommonName {

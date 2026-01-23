@@ -124,11 +124,14 @@ func (p *parser) VerifyJwt(ctx context.Context, parsedJwt *ParsedJWT) error {
 		_ = jwks.AddKey(key)
 	}
 
-	// Verify the JWT signature
-	// The algorithm is inferred from the key automatically
-	// In some providers there is no "alg" specified in the JWKS
-	_, err = jws.Verify([]byte(*parsedJwt.jwt), jws.WithKeySet(jwks, jws.WithInferAlgorithmFromKey(true)))
+	//Verify with full key set
+	log.Debug("Attempting verification with full key set")
+	_, err = jws.Verify(
+		[]byte(*parsedJwt.jwt),
+		jws.WithKeySet(jwks, jws.WithInferAlgorithmFromKey(true)), //some issuer like Entra don't include the alg in the jwk
+	)
 	if err != nil {
+		log.Debug("Verification with key set FAILED:", err)
 		return err
 	}
 
@@ -179,7 +182,13 @@ func (p *parser) ParseJwt(
 			return nil, err
 		}
 
-		commonName = httputil.Hostname(claims.Issuer)
+		// Use full issuer URL as common name when available in metadata
+		// (this handles Entra and other v2.0 endpoints correctly)
+		if providerMD.Issuer != "" {
+			commonName = providerMD.Issuer
+		} else {
+			commonName = httputil.Hostname(claims.Issuer)
+		}
 	}
 
 	return &ParsedJWT{

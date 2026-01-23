@@ -6,6 +6,7 @@ package types
 import (
 	"fmt"
 	"net/mail"
+	"net/url"
 
 	"github.com/agntcy/identity/pkg/jwk"
 )
@@ -61,6 +62,11 @@ type Issuer struct {
 func (i *Issuer) ValidateCommonName() error {
 	if i.CommonName == "" {
 		return fmt.Errorf("common name is empty")
+	}
+
+	// Try to parse as URL first
+	if u, err := url.Parse(i.CommonName); err == nil && u.Scheme != "" && u.Host != "" {
+		return nil // Valid URL
 	}
 
 	// Validate FQDA
