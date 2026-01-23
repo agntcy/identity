@@ -73,6 +73,7 @@ func (v *service) Verify(
 	// Check the proof type
 	if !proof.IsJWT() {
 		log.FromContext(ctx).WithField("proof_type", proof.Type).Debug("Proof is not JWT")
+
 		return nil, errutil.ErrInfo(
 			errtypes.ERROR_REASON_UNSUPPORTED_PROOF,
 			fmt.Sprintf("unsupported proof type: %s", proof.Type),
@@ -84,6 +85,7 @@ func (v *service) Verify(
 	parsedJWT, err := v.oidcParser.ParseJwt(ctx, &proof.ProofValue)
 	if err != nil {
 		log.FromContext(ctx).WithError(err).Error("Failed to parse JWT")
+
 		return nil, errutil.ErrInfo(
 			errtypes.ERROR_REASON_INVALID_PROOF,
 			err.Error(),
@@ -96,6 +98,7 @@ func (v *service) Verify(
 	if parsedJWT.Provider == oidc.SelfProviderName {
 		// We make sure we always use the Issuer's public key to verify the JWT
 		parsedJWT.Claims.SubJWK = string(issuer.PublicKey.ToJSON())
+
 		log.FromContext(ctx).Debug("Using issuer's public key for self-signed JWT")
 	}
 

@@ -124,11 +124,12 @@ func (p *parser) VerifyJwt(ctx context.Context, parsedJwt *ParsedJWT) error {
 		_ = jwks.AddKey(key)
 	}
 
-	//Verify with full key set
+	// Verify with full key set
 	log.Debug("Attempting verification with full key set")
+
 	_, err = jws.Verify(
 		[]byte(*parsedJwt.jwt),
-		jws.WithKeySet(jwks, jws.WithInferAlgorithmFromKey(true)), //some issuer like Entra don't include the alg in the jwk
+		jws.WithKeySet(jwks, jws.WithInferAlgorithmFromKey(true)), // Some issuer like Entra don't include the alg in the jwk.
 	)
 	if err != nil {
 		log.Debug("Verification with key set FAILED:", err)
