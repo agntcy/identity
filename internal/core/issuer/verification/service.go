@@ -84,7 +84,7 @@ func (v *service) Verify(
 	// Parse JWT to extract the common name and issuer information
 	parsedJWT, err := v.oidcParser.ParseJwt(ctx, &proof.ProofValue)
 	if err != nil {
-		log.FromContext(ctx).WithError(err).Error("Failed to parse JWT")
+		log.FromContext(ctx).Debug("Failed to parse JWT")
 
 		return nil, errutil.ErrInfo(
 			errtypes.ERROR_REASON_INVALID_PROOF,
@@ -107,7 +107,7 @@ func (v *service) Verify(
 	// Verify the JWT signature
 	err = v.oidcParser.VerifyJwt(ctx, parsedJWT)
 	if err != nil {
-		log.FromContext(ctx).WithError(err).Error("JWT signature verification failed")
+		log.FromContext(ctx).Debug("JWT signature verification failed")
 		return nil, errutil.ErrInfo(errtypes.ERROR_REASON_INVALID_PROOF, err.Error(), err)
 	}
 
