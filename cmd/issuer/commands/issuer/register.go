@@ -15,7 +15,7 @@ import (
 	idptypes "github.com/agntcy/identity/internal/issuer/types"
 	"github.com/agntcy/identity/internal/issuer/vault"
 	"github.com/agntcy/identity/internal/pkg/cmdutil"
-	"github.com/agntcy/identity/internal/pkg/httputil"
+	"github.com/agntcy/identity/pkg/oidc"
 	"github.com/google/uuid"
 	"github.com/spf13/cobra"
 )
@@ -113,8 +113,8 @@ func (cmd *RegisterCommand) Run(ctx context.Context, flags *RegisterFlags) error
 		}
 
 		// extract the root url from the issuer URL as the common name
-		commonName = httputil.Hostname(flags.IssuerURL)
-		if commonName == "" {
+		commonName, err = oidc.ParseCommonName(flags.IssuerURL)
+		if commonName == "" || err != nil {
 			return fmt.Errorf("error extracting common name from issuer URL")
 		}
 

@@ -179,7 +179,10 @@ func (p *parser) ParseJwt(
 			return nil, err
 		}
 
-		commonName = httputil.Hostname(claims.Issuer)
+		commonName, err = ParseCommonName(claims.Issuer)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return &ParsedJWT{
