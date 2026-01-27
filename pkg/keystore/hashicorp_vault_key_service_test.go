@@ -1,7 +1,6 @@
 // Copyright 2025 AGNTCY Contributors (https://github.com/agntcy)
 // SPDX-License-Identifier: Apache-2.0
 //go:build integration
-// +build integration
 
 package keystore_test
 

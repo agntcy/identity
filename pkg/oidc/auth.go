@@ -9,12 +9,15 @@ import (
 	"golang.org/x/oauth2/clientcredentials"
 )
 
+type AuthenticatorTokenOption func(config *clientcredentials.Config)
+
 type Authenticator interface {
 	Token(
 		ctx context.Context,
 		issuer string,
 		clientID string,
 		clientSecret string,
+		options ...AuthenticatorTokenOption,
 	) (string, error)
 }
 
@@ -24,11 +27,18 @@ func NewAuthenticator() Authenticator {
 	return &oidcAuthenticator{}
 }
 
+func WithScopes(scopes []string) AuthenticatorTokenOption {
+	return func(config *clientcredentials.Config) {
+		config.Scopes = scopes
+	}
+}
+
 func (oidcAuthenticator) Token(
 	ctx context.Context,
 	issuer string,
 	clientID string,
 	clientSecret string,
+	options ...AuthenticatorTokenOption,
 ) (string, error) {
 	provider, err := getProviderMetadata(ctx, issuer)
 	if err != nil {
@@ -40,6 +50,10 @@ func (oidcAuthenticator) Token(
 		ClientSecret: clientSecret,
 		TokenURL:     provider.TokenURL,
 		Scopes:       []string{},
+	}
+
+	for _, opt := range options {
+		opt(&conf)
 	}
 
 	token, err := conf.Token(ctx)
