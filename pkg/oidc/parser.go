@@ -39,6 +39,7 @@ const (
 	OryProviderName
 	IdpProviderName
 	PingProviderName
+	EntraProviderName
 	SelfProviderName
 )
 
