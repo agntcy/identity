@@ -35,6 +35,8 @@ func (p *parser) detectProviderName(
 		return DuoProviderName, nil
 	case isPing(headers, providerUrl.Host):
 		return PingProviderName, nil
+	case isEntra(headers, providerUrl.Host):
+		return EntraProviderName, nil
 	default:
 		return IdpProviderName, nil
 	}
@@ -60,6 +62,10 @@ func isPing(_ http.Header, host string) bool {
 		strings.HasSuffix(host, "pingone.eu") ||
 		strings.HasSuffix(host, "pingone.com.au") ||
 		strings.HasSuffix(host, "pingone.ca")
+}
+
+func isEntra(_ http.Header, host string) bool {
+	return strings.HasSuffix(host, "microsoftonline.com")
 }
 
 func getProviderMetadata(ctx context.Context, issuer string) (*providerMetadata, error) {
