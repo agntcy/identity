@@ -19,6 +19,9 @@ packages:
   github.com/agntcy/identity/internal/core/issuer:
     interfaces:
       Repository: {}
+  github.com/agntcy/identity/internal/core/issuer/verification:
+    interfaces:
+      Service: {}
   github.com/agntcy/identity/internal/core/vc:
     interfaces:
       Repository: {}

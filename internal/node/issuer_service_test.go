@@ -12,6 +12,8 @@ import (
 	errcore "github.com/agntcy/identity/internal/core/errors"
 	issuermocks "github.com/agntcy/identity/internal/core/issuer/mocks"
 	issuertypes "github.com/agntcy/identity/internal/core/issuer/types"
+	"github.com/agntcy/identity/internal/core/issuer/verification"
+	verifmocks "github.com/agntcy/identity/internal/core/issuer/verification/mocks"
 	verificationtesting "github.com/agntcy/identity/internal/core/issuer/verification/testing"
 	vctypes "github.com/agntcy/identity/internal/core/vc/types"
 	"github.com/agntcy/identity/internal/node"
@@ -19,6 +21,7 @@ import (
 	"github.com/lestrrat-go/jwx/v3/jwa"
 	"github.com/lestrrat-go/jwx/v3/jwk"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
 
 func TestRegisterIssuer_Should_Not_Register_Same_Issuer_Twice(t *testing.T) {
@@ -31,7 +34,14 @@ func TestRegisterIssuer_Should_Not_Register_Same_Issuer_Twice(t *testing.T) {
 		PublicKey:    pubKey,
 	}
 
-	verficationSrv := verificationtesting.NewFakeVerifiedVerificationServiceStub()
+	verficationSrv := verifmocks.NewService(t)
+	verficationSrv.EXPECT().
+		Verify(t.Context(), issuer, mock.Anything).
+		Return(&verification.Result{
+			Issuer:   issuer,
+			Verified: true,
+		}, nil)
+
 	issuerRepo := issuermocks.NewRepository(t)
 	issuerRepo.EXPECT().GetIssuer(t.Context(), issuer.CommonName).Return(issuer, nil)
 	sut := node.NewIssuerService(issuerRepo, verficationSrv)
@@ -55,7 +65,14 @@ func TestRegisterIssuer_Should_Register_Verified_Issuer(t *testing.T) {
 		PublicKey:    pubKey,
 	}
 
-	verficationSrv := verificationtesting.NewFakeVerifiedVerificationServiceStub()
+	verficationSrv := verifmocks.NewService(t)
+	verficationSrv.EXPECT().
+		Verify(t.Context(), issuer, mock.Anything).
+		Return(&verification.Result{
+			Issuer:   issuer,
+			Verified: true,
+		}, nil)
+
 	issuerRepo := issuermocks.NewRepository(t)
 	issuerRepo.EXPECT().CreateIssuer(t.Context(), issuer).Return(issuer, nil)
 	issuerRepo.EXPECT().GetIssuer(t.Context(), issuer.CommonName).Return(nil, errcore.ErrResourceNotFound)
@@ -81,7 +98,14 @@ func TestRegisterIssuer_Should_Register_Unverified_Issuer(t *testing.T) {
 		Organization: "Some Org",
 		PublicKey:    pubKey,
 	}
-	verficationSrv := verificationtesting.NewFakeUnverifiedVerificationServiceStub()
+	verficationSrv := verifmocks.NewService(t)
+	verficationSrv.EXPECT().
+		Verify(t.Context(), issuer, mock.Anything).
+		Return(&verification.Result{
+			Issuer:   issuer,
+			Verified: false,
+		}, nil)
+
 	issuerRepo := issuermocks.NewRepository(t)
 	issuerRepo.EXPECT().CreateIssuer(t.Context(), issuer).Return(issuer, nil)
 	issuerRepo.EXPECT().GetIssuer(t.Context(), issuer.CommonName).Return(nil, errcore.ErrResourceNotFound)
