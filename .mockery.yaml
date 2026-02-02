@@ -13,3 +13,6 @@ packages:
       IdService: {}
       IssuerService: {}
       VerifiableCredentialService: {}
+  github.com/agntcy/identity/internal/core/vc:
+    interfaces:
+      Repository: {}
