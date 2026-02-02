@@ -14,8 +14,7 @@ import (
 	errcore "github.com/agntcy/identity/internal/core/errors"
 	errtesting "github.com/agntcy/identity/internal/core/errors/testing"
 	errtypes "github.com/agntcy/identity/internal/core/errors/types"
-	idcore "github.com/agntcy/identity/internal/core/id"
-	idtesting "github.com/agntcy/identity/internal/core/id/testing"
+	idmocks "github.com/agntcy/identity/internal/core/id/mocks"
 	idtypes "github.com/agntcy/identity/internal/core/id/types"
 	issuertesting "github.com/agntcy/identity/internal/core/issuer/testing"
 	issuertypes "github.com/agntcy/identity/internal/core/issuer/types"
@@ -55,7 +54,7 @@ var invalidParsedJWT = &oidc.ParsedJWT{
 func TestPublishVC(t *testing.T) {
 	t.Parallel()
 
-	idRepo := idtesting.NewFakeIdRepository()
+	idRepo := idmocks.NewIdRepository(t)
 	issuerRepo := issuertesting.NewFakeIssuerRepository()
 	vcRepo := vcmocks.NewRepository(t)
 	vcRepo.EXPECT().Create(t.Context(), mock.Anything, mock.Anything).Return(nil, nil)
@@ -71,7 +70,7 @@ func TestPublishVC(t *testing.T) {
 	}
 	_, _ = issuerRepo.CreateIssuer(t.Context(), issuer)
 
-	envelope := generateValidVC(t, idRepo, issuer)
+	envelope := generateValidVC(t, idRepo)
 
 	err := sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: "JWT"})
 
@@ -94,11 +93,11 @@ func TestPublishVC_Should_Return_Invalid_Credential_Format_Error(t *testing.T) {
 func TestPublishVC_Should_Return_Invalid_Proof_Error_If_Empty(t *testing.T) {
 	t.Parallel()
 
-	idRepo := idtesting.NewFakeIdRepository()
+	idRepo := idmocks.NewIdRepository(t)
 	vcRepo := vcmocks.NewRepository(t)
 	verifSrv := issuerverif.NewService(oidctesting.NewFakeParser(nil, nil), nil)
 	sut := node.NewVerifiableCredentialService(idRepo, verifSrv, vcRepo)
-	envelope := generateValidVC(t, idRepo, &issuertypes.Issuer{CommonName: "issuer"})
+	envelope := generateValidVC(t, idRepo)
 
 	err := sut.Publish(t.Context(), envelope, nil)
 
@@ -108,11 +107,11 @@ func TestPublishVC_Should_Return_Invalid_Proof_Error_If_Empty(t *testing.T) {
 func TestPublishVC_Should_Return_Invalid_Proof_Error(t *testing.T) {
 	t.Parallel()
 
-	idRepo := idtesting.NewFakeIdRepository()
+	idRepo := idmocks.NewIdRepository(t)
 	vcRepo := vcmocks.NewRepository(t)
 	verifSrv := issuerverif.NewService(oidctesting.NewFakeParser(nil, errors.New("")), nil)
 	sut := node.NewVerifiableCredentialService(idRepo, verifSrv, vcRepo)
-	envelope := generateValidVC(t, idRepo, &issuertypes.Issuer{CommonName: "issuer"})
+	envelope := generateValidVC(t, idRepo)
 	invalidProof := &vctypes.Proof{Type: "JWT"}
 
 	err := sut.Publish(t.Context(), envelope, invalidProof)
@@ -123,7 +122,7 @@ func TestPublishVC_Should_Return_Invalid_Proof_Error(t *testing.T) {
 func TestPublishVC_Should_Return_Issuer_Not_Registered(t *testing.T) {
 	t.Parallel()
 
-	idRepo := idtesting.NewFakeIdRepository()
+	idRepo := idmocks.NewIdRepository(t)
 	issuerRepo := issuertesting.NewFakeIssuerRepository()
 	vcRepo := vcmocks.NewRepository(t)
 	verifSrv := issuerverif.NewService(
@@ -136,7 +135,7 @@ func TestPublishVC_Should_Return_Issuer_Not_Registered(t *testing.T) {
 		Organization: "Some Org",
 	}
 	_, _ = issuerRepo.CreateIssuer(t.Context(), issuer)
-	envelope := generateValidVC(t, idRepo, issuer)
+	envelope := generateValidVC(t, idRepo)
 
 	err := sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: "JWT"})
 
@@ -227,7 +226,7 @@ func TestRevokeVC_Should_Succeed(t *testing.T) {
 	}
 	privKey, pubKey, _ := genKey()
 	resolverMD := generateValidResolverMD(t, pubKey)
-	idRepo := idtesting.NewFakeIdRepository()
+	idRepo := idmocks.NewIdRepository(t)
 	issuerRepo := issuertesting.NewFakeIssuerRepository()
 	vcRepo := vcmocks.NewRepository(t)
 	vcRepo.EXPECT().Create(t.Context(), mock.Anything, mock.Anything).Return(nil, nil)
@@ -244,7 +243,8 @@ func TestRevokeVC_Should_Succeed(t *testing.T) {
 		Organization: "Some Org",
 	}
 	_, _ = issuerRepo.CreateIssuer(t.Context(), issuer)
-	_, _ = idRepo.CreateID(t.Context(), resolverMD, issuer)
+	idRepo.EXPECT().ResolveID(t.Context(), resolverMD.ID).Return(resolverMD, nil)
+
 	envelope, err := signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
 
@@ -275,7 +275,7 @@ func TestRevokeVC_Should_Fail_When_VC_Not_Found(t *testing.T) {
 	}
 	privKey, pubKey, _ := genKey()
 
-	idRepo := idtesting.NewFakeIdRepository()
+	idRepo := idmocks.NewIdRepository(t)
 	issuerRepo := issuertesting.NewFakeIssuerRepository()
 	vcRepo := vcmocks.NewRepository(t)
 	vcRepo.EXPECT().Create(t.Context(), mock.Anything, mock.Anything).Return(nil, nil)
@@ -292,7 +292,7 @@ func TestRevokeVC_Should_Fail_When_VC_Not_Found(t *testing.T) {
 	_, _ = issuerRepo.CreateIssuer(t.Context(), issuer)
 
 	resolverMD := generateValidResolverMD(t, pubKey)
-	_, _ = idRepo.CreateID(t.Context(), resolverMD, issuer)
+	idRepo.EXPECT().ResolveID(t.Context(), resolverMD.ID).Return(resolverMD, nil)
 
 	envelope, err := signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
@@ -331,7 +331,7 @@ func TestRevoke_Should_Fail_When_VC_Already_Revoked(t *testing.T) {
 		},
 	}
 	privKey, pubKey, _ := genKey()
-	idRepo := idtesting.NewFakeIdRepository()
+	idRepo := idmocks.NewIdRepository(t)
 	issuerRepo := issuertesting.NewFakeIssuerRepository()
 	vcRepo := vcmocks.NewRepository(t)
 	vcRepo.EXPECT().Create(t.Context(), mock.Anything, mock.Anything).Return(nil, nil)
@@ -349,7 +349,8 @@ func TestRevoke_Should_Fail_When_VC_Already_Revoked(t *testing.T) {
 	_, _ = issuerRepo.CreateIssuer(t.Context(), issuer)
 
 	resolverMD := generateValidResolverMD(t, pubKey)
-	_, _ = idRepo.CreateID(t.Context(), resolverMD, issuer)
+	idRepo.EXPECT().ResolveID(t.Context(), resolverMD.ID).Return(resolverMD, nil)
+
 	envelope, err := signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
 
@@ -386,11 +387,11 @@ func TestRevokeVC_Should_Return_Invalid_Credential_Format_Error(t *testing.T) {
 func TestRevokeVC_Should_Return_Invalid_Proof_Error_If_Empty(t *testing.T) {
 	t.Parallel()
 
-	idRepo := idtesting.NewFakeIdRepository()
+	idRepo := idmocks.NewIdRepository(t)
 	vcRepo := vcmocks.NewRepository(t)
 	verifSrv := issuerverif.NewService(oidctesting.NewFakeParser(nil, nil), nil)
 	sut := node.NewVerifiableCredentialService(idRepo, verifSrv, vcRepo)
-	envelope := generateValidVC(t, idRepo, &issuertypes.Issuer{CommonName: "issuer"})
+	envelope := generateValidVC(t, idRepo)
 
 	err := sut.Revoke(t.Context(), envelope, nil)
 
@@ -400,11 +401,11 @@ func TestRevokeVC_Should_Return_Invalid_Proof_Error_If_Empty(t *testing.T) {
 func TestRevokeVC_Should_Return_Invalid_Proof_Error(t *testing.T) {
 	t.Parallel()
 
-	idRepo := idtesting.NewFakeIdRepository()
+	idRepo := idmocks.NewIdRepository(t)
 	vcRepo := vcmocks.NewRepository(t)
 	verifSrv := issuerverif.NewService(oidctesting.NewFakeParser(nil, errors.New("")), nil)
 	sut := node.NewVerifiableCredentialService(idRepo, verifSrv, vcRepo)
-	envelope := generateValidVC(t, idRepo, &issuertypes.Issuer{CommonName: "issuer"})
+	envelope := generateValidVC(t, idRepo)
 	invalidProof := &vctypes.Proof{Type: "JWT"}
 
 	err := sut.Revoke(t.Context(), envelope, invalidProof)
@@ -415,7 +416,7 @@ func TestRevokeVC_Should_Return_Invalid_Proof_Error(t *testing.T) {
 func TestRevokeVC_Should_Return_Issuer_Not_Registered(t *testing.T) {
 	t.Parallel()
 
-	idRepo := idtesting.NewFakeIdRepository()
+	idRepo := idmocks.NewIdRepository(t)
 	issuerRepo := issuertesting.NewFakeIssuerRepository()
 	vcRepo := vcmocks.NewRepository(t)
 	verifSrv := issuerverif.NewService(
@@ -428,7 +429,7 @@ func TestRevokeVC_Should_Return_Issuer_Not_Registered(t *testing.T) {
 		Organization: "Some Org",
 	}
 	_, _ = issuerRepo.CreateIssuer(t.Context(), issuer)
-	envelope := generateValidVC(t, idRepo, issuer)
+	envelope := generateValidVC(t, idRepo)
 
 	err := sut.Revoke(t.Context(), envelope, &vctypes.Proof{Type: "JWT"})
 
@@ -467,7 +468,7 @@ func TestRevoke_Should_Fail_When_Status_Does_Not_Have_Revocation(t *testing.T) {
 func setupVcServiceWithResolverMD(t *testing.T, pubKey *jwktype.Jwk) node.VerifiableCredentialService {
 	t.Helper()
 
-	idRepo := idtesting.NewFakeIdRepository()
+	idRepo := idmocks.NewIdRepository(t)
 	issuerRepo := issuertesting.NewFakeIssuerRepository()
 	vcRepo := vcmocks.NewRepository(t)
 	vcRepo.EXPECT().Create(t.Context(), mock.Anything, mock.Anything).Return(nil, nil)
@@ -484,7 +485,7 @@ func setupVcServiceWithResolverMD(t *testing.T, pubKey *jwktype.Jwk) node.Verifi
 	_, _ = issuerRepo.CreateIssuer(t.Context(), issuer)
 
 	resolverMD := generateValidResolverMD(t, pubKey)
-	_, _ = idRepo.CreateID(t.Context(), resolverMD, issuer)
+	idRepo.EXPECT().ResolveID(t.Context(), resolverMD.ID).Return(resolverMD, nil)
 
 	return sut
 }
@@ -503,11 +504,7 @@ func generateValidResolverMD(t *testing.T, pubKey *jwktype.Jwk) *idtypes.Resolve
 	}
 }
 
-func generateValidVC(
-	t *testing.T,
-	idRepo idcore.IdRepository,
-	issuer *issuertypes.Issuer,
-) *vctypes.EnvelopedCredential {
+func generateValidVC(t *testing.T, idRepo *idmocks.IdRepository) *vctypes.EnvelopedCredential {
 	t.Helper()
 
 	credential := &vctypes.VerifiableCredential{
@@ -522,7 +519,7 @@ func generateValidVC(
 	assert.NoError(t, err)
 
 	resolverMD := generateValidResolverMD(t, pubKey)
-	_, _ = idRepo.CreateID(t.Context(), resolverMD, issuer)
+	idRepo.EXPECT().ResolveID(t.Context(), resolverMD.ID).Return(resolverMD, nil)
 
 	return envelope
 }
