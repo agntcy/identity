@@ -4,13 +4,13 @@
 package node_test
 
 import (
-	"context"
 	"crypto/rand"
 	"crypto/rsa"
 	"encoding/json"
 	"testing"
 
-	issuertesting "github.com/agntcy/identity/internal/core/issuer/testing"
+	errcore "github.com/agntcy/identity/internal/core/errors"
+	issuermocks "github.com/agntcy/identity/internal/core/issuer/mocks"
 	issuertypes "github.com/agntcy/identity/internal/core/issuer/types"
 	verificationtesting "github.com/agntcy/identity/internal/core/issuer/verification/testing"
 	vctypes "github.com/agntcy/identity/internal/core/vc/types"
@@ -24,44 +24,42 @@ import (
 func TestRegisterIssuer_Should_Not_Register_Same_Issuer_Twice(t *testing.T) {
 	t.Parallel()
 
-	verficationSrv := verificationtesting.NewFakeVerifiedVerificationServiceStub()
-	issuerRepo := issuertesting.NewFakeIssuerRepository()
-	sut := node.NewIssuerService(issuerRepo, verficationSrv)
 	pubKey, _ := generatePubKey()
-
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
 		Organization: "Some Org",
 		PublicKey:    pubKey,
 	}
 
+	verficationSrv := verificationtesting.NewFakeVerifiedVerificationServiceStub()
+	issuerRepo := issuermocks.NewRepository(t)
+	issuerRepo.EXPECT().GetIssuer(t.Context(), issuer.CommonName).Return(issuer, nil)
+	sut := node.NewIssuerService(issuerRepo, verficationSrv)
+
 	proof := &vctypes.Proof{
 		Type:       "JWT",
 		ProofValue: "",
 	}
 
-	// Register once
-	err := sut.Register(context.Background(), issuer, proof)
-	assert.NoError(t, err)
-
-	// Attempt to register the same issuer again
-	err = sut.Register(context.Background(), issuer, proof)
+	err := sut.Register(t.Context(), issuer, proof)
 	assert.Error(t, err)
 }
 
 func TestRegisterIssuer_Should_Register_Verified_Issuer(t *testing.T) {
 	t.Parallel()
 
-	verficationSrv := verificationtesting.NewFakeVerifiedVerificationServiceStub()
-	issuerRepo := issuertesting.NewFakeIssuerRepository()
-	sut := node.NewIssuerService(issuerRepo, verficationSrv)
 	pubKey, _ := generatePubKey()
-
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
 		Organization: "Some Org",
 		PublicKey:    pubKey,
 	}
+
+	verficationSrv := verificationtesting.NewFakeVerifiedVerificationServiceStub()
+	issuerRepo := issuermocks.NewRepository(t)
+	issuerRepo.EXPECT().CreateIssuer(t.Context(), issuer).Return(issuer, nil)
+	issuerRepo.EXPECT().GetIssuer(t.Context(), issuer.CommonName).Return(nil, errcore.ErrResourceNotFound)
+	sut := node.NewIssuerService(issuerRepo, verficationSrv)
 
 	proof := &vctypes.Proof{
 		Type:       "JWT",
@@ -69,32 +67,25 @@ func TestRegisterIssuer_Should_Register_Verified_Issuer(t *testing.T) {
 	}
 
 	// Register once
-	err := sut.Register(context.Background(), issuer, proof)
+	err := sut.Register(t.Context(), issuer, proof)
 	assert.NoError(t, err)
-
-	// Verify the issuer is registered
-	registeredIssuer, err := issuerRepo.GetIssuer(
-		context.Background(),
-		verificationtesting.ValidProofIssuer,
-	)
-	assert.NoError(t, err)
-	assert.NotNil(t, registeredIssuer)
-	assert.Equal(t, registeredIssuer.Verified, true)
+	assert.Equal(t, issuer.Verified, true)
 }
 
 func TestRegisterIssuer_Should_Register_Unverified_Issuer(t *testing.T) {
 	t.Parallel()
 
-	verficationSrv := verificationtesting.NewFakeUnverifiedVerificationServiceStub()
-	issuerRepo := issuertesting.NewFakeIssuerRepository()
-	sut := node.NewIssuerService(issuerRepo, verficationSrv)
 	pubKey, _ := generatePubKey()
-
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
 		Organization: "Some Org",
 		PublicKey:    pubKey,
 	}
+	verficationSrv := verificationtesting.NewFakeUnverifiedVerificationServiceStub()
+	issuerRepo := issuermocks.NewRepository(t)
+	issuerRepo.EXPECT().CreateIssuer(t.Context(), issuer).Return(issuer, nil)
+	issuerRepo.EXPECT().GetIssuer(t.Context(), issuer.CommonName).Return(nil, errcore.ErrResourceNotFound)
+	sut := node.NewIssuerService(issuerRepo, verficationSrv)
 
 	proof := &vctypes.Proof{
 		Type:       "JWT",
@@ -102,17 +93,9 @@ func TestRegisterIssuer_Should_Register_Unverified_Issuer(t *testing.T) {
 	}
 
 	// Register once
-	err := sut.Register(context.Background(), issuer, proof)
+	err := sut.Register(t.Context(), issuer, proof)
 	assert.NoError(t, err)
-
-	// Verify the issuer is registered
-	registeredIssuer, err := issuerRepo.GetIssuer(
-		context.Background(),
-		verificationtesting.ValidProofIssuer,
-	)
-	assert.NoError(t, err)
-	assert.NotNil(t, registeredIssuer)
-	assert.Equal(t, registeredIssuer.Verified, false)
+	assert.Equal(t, issuer.Verified, false)
 }
 
 func generatePubKey() (*jwktype.Jwk, error) {
