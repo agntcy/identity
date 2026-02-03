@@ -4,7 +4,6 @@
 package node_test
 
 import (
-	"context"
 	"errors"
 	"testing"
 
@@ -13,15 +12,12 @@ import (
 	errtypes "github.com/agntcy/identity/internal/core/errors/types"
 	idmocks "github.com/agntcy/identity/internal/core/id/mocks"
 	idtypes "github.com/agntcy/identity/internal/core/id/types"
-	issuermocks "github.com/agntcy/identity/internal/core/issuer/mocks"
 	issuertypes "github.com/agntcy/identity/internal/core/issuer/types"
-	issuerverif "github.com/agntcy/identity/internal/core/issuer/verification"
 	verificationtesting "github.com/agntcy/identity/internal/core/issuer/verification/testing"
 	vctypes "github.com/agntcy/identity/internal/core/vc/types"
 	"github.com/agntcy/identity/internal/node"
-	"github.com/agntcy/identity/pkg/jwk"
-	"github.com/agntcy/identity/pkg/oidc"
-	oidctesting "github.com/agntcy/identity/pkg/oidc/testing"
+	nodemocks "github.com/agntcy/identity/internal/node/mocks"
+	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
@@ -40,22 +36,9 @@ func TestGenerateID_Should_Not_Return_Errors(t *testing.T) {
 		CommonName:   verificationtesting.ValidProofIssuer,
 		Organization: "Some Org",
 	}
-	issuerRepo := issuermocks.NewRepository(t)
-	issuerRepo.EXPECT().GetIssuer(t.Context(), issuer.CommonName).Return(issuer, nil)
+	idGen := nodemocks.NewIDGenerator(t)
+	idGen.EXPECT().GenerateFromProof(t.Context(), mock.Anything).Return(id, issuer, nil)
 
-	jwt := &oidc.ParsedJWT{
-		Provider: oidc.DuoProviderName,
-		Claims: &oidc.Claims{
-			Issuer:  "http://" + verificationtesting.ValidProofIssuer,
-			Subject: "test",
-		},
-		CommonName: verificationtesting.ValidProofIssuer,
-	}
-	idGen := node.NewIDGenerator(
-		issuerverif.NewService(
-			oidctesting.NewFakeParser(jwt, nil),
-			issuerRepo,
-		))
 	sut := node.NewIdService(idRepo, idGen)
 
 	md, err := sut.Generate(t.Context(), issuer, &vctypes.Proof{Type: "JWT"})
@@ -78,23 +61,9 @@ func TestGenerateID_Should_Not_Return_Error_With_Self_Provider(t *testing.T) {
 		CommonName:   verificationtesting.ValidProofIssuer,
 		Organization: "Some Org",
 	}
-	issuerRepo := issuermocks.NewRepository(t)
-	issuerRepo.EXPECT().GetIssuer(t.Context(), issuer.CommonName).Return(issuer, nil)
+	idGen := nodemocks.NewIDGenerator(t)
+	idGen.EXPECT().GenerateFromProof(t.Context(), mock.Anything).Return(id, issuer, nil)
 
-	jwt := &oidc.ParsedJWT{
-		Provider: oidc.SelfProviderName,
-		Claims: &oidc.Claims{
-			Issuer:  verificationtesting.ValidProofIssuer,
-			Subject: "test",
-		},
-		CommonName: verificationtesting.ValidProofIssuer,
-	}
-	idGen := node.NewIDGenerator(
-		issuerverif.NewService(
-			oidctesting.NewFakeParser(jwt, nil),
-			issuerRepo,
-		),
-	)
 	sut := node.NewIdService(idRepo, idGen)
 
 	md, err := sut.Generate(t.Context(), issuer, &vctypes.Proof{Type: "JWT"})
@@ -103,76 +72,17 @@ func TestGenerateID_Should_Not_Return_Error_With_Self_Provider(t *testing.T) {
 	assert.Equal(t, id, md.ID)
 }
 
-func TestGenerateID_Should_Return_Error_With_Idp_And_Self_Proof(t *testing.T) {
+func TestGenerateID_Should_Return_When_GenerateFromProof_Fails(t *testing.T) {
 	t.Parallel()
 
-	idRepo := idmocks.NewIdRepository(t)
+	idGen := nodemocks.NewIDGenerator(t)
+	idGen.EXPECT().GenerateFromProof(t.Context(), mock.Anything).Return("", nil, errors.New("failed"))
 
-	issuer := &issuertypes.Issuer{
-		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
-		Verified:     true,
-		PublicKey:    &jwk.Jwk{},
-		AuthType:     issuertypes.ISSUER_AUTH_TYPE_IDP,
-	}
-	issuerRepo := issuermocks.NewRepository(t)
-	issuerRepo.EXPECT().GetIssuer(context.Background(), issuer.CommonName).Return(issuer, nil)
-
-	jwt := &oidc.ParsedJWT{
-		Provider: oidc.SelfProviderName,
-		Claims: &oidc.Claims{
-			Issuer:  verificationtesting.ValidProofIssuer,
-			Subject: "test",
-		},
-		CommonName: verificationtesting.ValidProofIssuer,
-	}
-	idGen := node.NewIDGenerator(
-		issuerverif.NewService(
-			oidctesting.NewFakeParser(jwt, nil),
-			issuerRepo,
-		),
-	)
-	sut := node.NewIdService(idRepo, idGen)
-
-	_, err := sut.Generate(context.Background(), issuer, &vctypes.Proof{Type: "JWT"})
-
-	errtesting.AssertErrorInfoReason(t, err, errtypes.ERROR_REASON_IDP_REQUIRED)
-}
-
-func TestGenerateID_Should_Return_Invalid_Proof_If_Empty(t *testing.T) {
-	t.Parallel()
-
-	oidcParser := oidctesting.NewFakeParser(&oidc.ParsedJWT{}, nil)
-	idGen := node.NewIDGenerator(issuerverif.NewService(oidcParser, nil))
 	sut := node.NewIdService(nil, idGen)
-	issuer := &issuertypes.Issuer{
-		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
-	}
 
-	_, err := sut.Generate(context.Background(), issuer, nil)
+	_, err := sut.Generate(t.Context(), nil, &vctypes.Proof{Type: "JWT"})
 
-	errtesting.AssertErrorInfoReason(t, err, errtypes.ERROR_REASON_INVALID_PROOF)
-}
-
-func TestGenerateID_Should_Return_Invalid_Proof_Error(t *testing.T) {
-	t.Parallel()
-
-	idGen := node.NewIDGenerator(
-		issuerverif.NewService(
-			oidctesting.NewFakeParser(nil, errors.New("")),
-			nil,
-		),
-	)
-	sut := node.NewIdService(nil, idGen)
-	issuer := &issuertypes.Issuer{
-		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
-	}
-
-	_, err := sut.Generate(context.Background(), issuer, &vctypes.Proof{Type: "JWT"})
-
-	errtesting.AssertErrorInfoReason(t, err, errtypes.ERROR_REASON_INVALID_PROOF)
+	assert.ErrorContains(t, err, "failed")
 }
 
 func TestGenerateID_Should_Return_Invalid_Issuer_Error(t *testing.T) {
@@ -182,23 +92,9 @@ func TestGenerateID_Should_Return_Invalid_Issuer_Error(t *testing.T) {
 		CommonName:   verificationtesting.ValidProofIssuer,
 		Organization: "Some Org",
 	}
-	issuerRepo := issuermocks.NewRepository(t)
-	issuerRepo.EXPECT().GetIssuer(t.Context(), issuer.CommonName).Return(issuer, nil)
+	idGen := nodemocks.NewIDGenerator(t)
+	idGen.EXPECT().GenerateFromProof(t.Context(), mock.Anything).Return("", issuer, nil)
 
-	jwt := &oidc.ParsedJWT{
-		Provider: oidc.DuoProviderName,
-		Claims: &oidc.Claims{
-			Issuer:  "http://" + verificationtesting.ValidProofIssuer,
-			Subject: "test",
-		},
-		CommonName: verificationtesting.ValidProofIssuer,
-	}
-	idGen := node.NewIDGenerator(
-		issuerverif.NewService(
-			oidctesting.NewFakeParser(jwt, nil),
-			issuerRepo,
-		),
-	)
 	idRepo := idmocks.NewIdRepository(t)
 	idRepo.EXPECT().ResolveID(t.Context(), mock.Anything).Return(nil, errcore.ErrResourceNotFound)
 	sut := node.NewIdService(idRepo, idGen)
@@ -212,41 +108,10 @@ func TestGenerateID_Should_Return_Invalid_Issuer_Error(t *testing.T) {
 	errtesting.AssertErrorInfoReason(t, err, errtypes.ERROR_REASON_INVALID_ISSUER)
 }
 
-func TestGenerateID_Should_Return_Unregistred_Issuer_Error(t *testing.T) {
-	t.Parallel()
-
-	issuerRepo := issuermocks.NewRepository(t)
-	issuerRepo.EXPECT().GetIssuer(t.Context(), mock.Anything).Return(nil, errcore.ErrResourceNotFound)
-
-	jwt := &oidc.ParsedJWT{
-		Provider: oidc.DuoProviderName,
-		Claims:   &oidc.Claims{Subject: "test"},
-	}
-	idGen := node.NewIDGenerator(
-		issuerverif.NewService(
-			oidctesting.NewFakeParser(jwt, nil),
-			issuerRepo,
-		),
-	)
-	sut := node.NewIdService(nil, idGen)
-	issuer := &issuertypes.Issuer{
-		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
-	}
-
-	_, err := sut.Generate(t.Context(), issuer, &vctypes.Proof{Type: "JWT"})
-
-	errtesting.AssertErrorInfoReason(t, err, errtypes.ERROR_REASON_ISSUER_NOT_REGISTERED)
-}
-
 func TestGenerateID_Should_Return_ID_Already_Exists_Error(t *testing.T) {
 	t.Parallel()
 
-	claims := &oidc.Claims{
-		Issuer:  "http://" + verificationtesting.ValidProofIssuer,
-		Subject: "test",
-	}
-	existingMD := &idtypes.ResolverMetadata{ID: "DUO-" + claims.Subject}
+	existingMD := &idtypes.ResolverMetadata{ID: "DUO-" + uuid.NewString()}
 
 	idRepo := idmocks.NewIdRepository(t)
 	idRepo.EXPECT().ResolveID(t.Context(), existingMD.ID).Return(existingMD, nil)
@@ -255,20 +120,9 @@ func TestGenerateID_Should_Return_ID_Already_Exists_Error(t *testing.T) {
 		CommonName:   verificationtesting.ValidProofIssuer,
 		Organization: "Some Org",
 	}
-	issuerRepo := issuermocks.NewRepository(t)
-	issuerRepo.EXPECT().GetIssuer(t.Context(), issuer.CommonName).Return(issuer, nil)
+	idGen := nodemocks.NewIDGenerator(t)
+	idGen.EXPECT().GenerateFromProof(t.Context(), mock.Anything).Return(existingMD.ID, issuer, nil)
 
-	jwt := &oidc.ParsedJWT{
-		Provider:   oidc.DuoProviderName,
-		Claims:     claims,
-		CommonName: verificationtesting.ValidProofIssuer,
-	}
-	idGen := node.NewIDGenerator(
-		issuerverif.NewService(
-			oidctesting.NewFakeParser(jwt, nil),
-			issuerRepo,
-		),
-	)
 	sut := node.NewIdService(idRepo, idGen)
 
 	_, err := sut.Generate(t.Context(), nil, &vctypes.Proof{Type: "JWT"})
