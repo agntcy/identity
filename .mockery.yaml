@@ -13,3 +13,21 @@ packages:
       IdService: {}
       IssuerService: {}
       VerifiableCredentialService: {}
+      IDGenerator: {}
+  github.com/agntcy/identity/internal/core/id:
+    interfaces:
+      IdRepository: {}
+  github.com/agntcy/identity/internal/core/issuer:
+    interfaces:
+      Repository: {}
+  github.com/agntcy/identity/internal/core/issuer/verification:
+    interfaces:
+      Service: {}
+  github.com/agntcy/identity/internal/core/vc:
+    interfaces:
+      Repository: {}
+  github.com/agntcy/identity/pkg/oidc:
+    interfaces:
+      Parser:
+          config:
+            dir: 'internal/core/issuer/verification/mocks'

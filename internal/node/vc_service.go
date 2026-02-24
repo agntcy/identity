@@ -92,7 +92,8 @@ func (s *verifiableCredentialService) Publish(
 		return err
 	}
 
-	if !strings.HasSuffix(id, issuerVerification.Subject) {
+	if !strings.HasSuffix(id, issuerVerification.Subject) ||
+		issuerVerification.Subject == "" {
 		return errutil.ErrInfo(
 			errtypes.ERROR_REASON_INVALID_VERIFIABLE_CREDENTIAL,
 			"the ID in the Verifiable Credential does not match the ID in the proof",
