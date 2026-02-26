@@ -33,7 +33,7 @@ jobs:
           helm template identity-node ./charts/identity-node --namespace identity-node > rendered.yaml
           sed -i 's/[[:space:]]*$//' rendered.yaml
       - name: 🧹 run superlinter
-        uses: super-linter/super-linter@ffde3b2b33b745cb612d787f669ef9442b1339a6 # v8.1.0
+        uses: super-linter/super-linter@2bdd90ed3262e023ac84bf8fe35dc480721fc1f2 # v8.2.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           LINTER_RULES_PATH: ".github/linters"
