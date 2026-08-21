@@ -93,7 +93,7 @@ identity badge issue [type] [options]
 You can issue badges for different types content:
 
 ```bash
-# OASF Files - https://schema.oasf.agntcy.org/objects/agent
+# OASF Files - https://schema.oasf.outshift.com/objects/record
 identity badge issue oasf -f /path/to/oasf_content.json
 
 # A2A Agent Cards - https://google.github.io/A2A/tutorials/python/3-agent-skills-and-card/#agent-card

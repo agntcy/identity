@@ -58,7 +58,7 @@ const (
 
 	// AgentBadge Content Type.
 	// The Agent content representation following a defined schema
-	// OASF: https://schema.oasf.agntcy.org/schema/objects/agent
+	// OASF: https://schema.oasf.outshift.com/schema/objects/record
 	// Google A2A: https://github.com/google/A2A/blob/main/specification/json/a2a.json
 	CREDENTIAL_CONTENT_TYPE_AGENT_BADGE
 

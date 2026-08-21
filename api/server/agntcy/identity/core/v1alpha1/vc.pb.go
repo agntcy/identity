@@ -33,7 +33,7 @@ const (
 	CredentialContentType_CREDENTIAL_CONTENT_TYPE_UNSPECIFIED CredentialContentType = 0
 	// AgentBadge Content Type.
 	// The Agent content representation following a defined schema
-	// OASF: https://schema.oasf.agntcy.org/schema/objects/agent
+	// OASF: https://schema.oasf.outshift.com/schema/objects/record
 	// Google A2A: https://github.com/google/A2A/blob/main/specification/json/a2a.json
 	CredentialContentType_CREDENTIAL_CONTENT_TYPE_AGENT_BADGE CredentialContentType = 1
 	// McpBadge Content Type.
