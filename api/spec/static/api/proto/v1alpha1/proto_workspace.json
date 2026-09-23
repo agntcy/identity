@@ -904,7 +904,7 @@
             {
               "name": "CREDENTIAL_CONTENT_TYPE_AGENT_BADGE",
               "number": "1",
-              "description": "AgentBadge Content Type.\nThe Agent content representation following a defined schema\nOASF: https://schema.oasf.agntcy.org/schema/objects/agent\nGoogle A2A: https://github.com/google/A2A/blob/main/specification/json/a2a.json"
+              "description": "AgentBadge Content Type.\nThe Agent content representation following a defined schema\nOASF: https://schema.oasf.outshift.com/schema/objects/record\nGoogle A2A: https://github.com/google/A2A/blob/main/specification/json/a2a.json"
             },
             {
               "name": "CREDENTIAL_CONTENT_TYPE_MCP_BADGE",
