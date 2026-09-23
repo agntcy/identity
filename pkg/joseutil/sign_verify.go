@@ -9,9 +9,9 @@ import (
 	"fmt"
 
 	jwktype "github.com/agntcy/identity/pkg/jwk"
-	"github.com/lestrrat-go/jwx/v2/jwa"
-	"github.com/lestrrat-go/jwx/v2/jwk"
-	"github.com/lestrrat-go/jwx/v2/jws"
+	"github.com/lestrrat-go/jwx/v3/jwa"
+	"github.com/lestrrat-go/jwx/v3/jwk"
+	"github.com/lestrrat-go/jwx/v3/jws"
 )
 
 // Sign creates a JWS signature for the provided payload using the specified key
@@ -87,13 +87,13 @@ func customJwkToLibraryJwk(jwkObj *jwktype.Jwk) (jwk.Key, error) {
 // determineAlgorithm maps algorithm string to jwa.SignatureAlgorithm
 func determineAlgorithm(algStr string) (jwa.SignatureAlgorithm, error) {
 	switch algStr {
-	case "RS256":
-		return jwa.RS256, nil
-	case "RS384":
-		return jwa.RS384, nil
-	case "RS512":
-		return jwa.RS512, nil
+	case AlgRS256:
+		return jwa.RS256(), nil
+	case AlgRS384:
+		return jwa.RS384(), nil
+	case AlgRS512:
+		return jwa.RS512(), nil
 	default:
-		return "", fmt.Errorf("unsupported algorithm: %s", algStr)
+		return jwa.SignatureAlgorithm{}, fmt.Errorf("unsupported algorithm: %s", algStr)
 	}
 }
