@@ -51,6 +51,11 @@ jobs:
           VALIDATE_JSCPD: false
           VALIDATE_CHECKOV: false
           VALIDATE_GO: false
+          # GO and GO_MODULES are both handled by the dedicated golangci-lint
+          # workflow. super-linter v8.1.0 bundles golangci-lint 2.4.0 built
+          # with go1.25, which panics with "package requires newer Go version
+          # go1.26" on this module set, and it only ever linted changed files.
+          VALIDATE_GO_MODULES: false
           VALIDATE_ENV: false
           VALIDATE_SHELL_SHFMT: false
           VALIDATE_PYTHON_BLACK: false

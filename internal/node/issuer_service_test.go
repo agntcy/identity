@@ -30,7 +30,7 @@ func TestRegisterIssuer_Should_Not_Register_Same_Issuer_Twice(t *testing.T) {
 	pubKey, _ := generatePubKey()
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
+		Organization: testOrganization,
 		PublicKey:    pubKey,
 	}
 
@@ -47,7 +47,7 @@ func TestRegisterIssuer_Should_Not_Register_Same_Issuer_Twice(t *testing.T) {
 	sut := node.NewIssuerService(issuerRepo, verficationSrv)
 
 	proof := &vctypes.Proof{
-		Type:       "JWT",
+		Type:       testProofTypeJWT,
 		ProofValue: "",
 	}
 
@@ -61,7 +61,7 @@ func TestRegisterIssuer_Should_Register_Verified_Issuer(t *testing.T) {
 	pubKey, _ := generatePubKey()
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
+		Organization: testOrganization,
 		PublicKey:    pubKey,
 	}
 
@@ -79,7 +79,7 @@ func TestRegisterIssuer_Should_Register_Verified_Issuer(t *testing.T) {
 	sut := node.NewIssuerService(issuerRepo, verficationSrv)
 
 	proof := &vctypes.Proof{
-		Type:       "JWT",
+		Type:       testProofTypeJWT,
 		ProofValue: "",
 	}
 
@@ -95,7 +95,7 @@ func TestRegisterIssuer_Should_Register_Unverified_Issuer(t *testing.T) {
 	pubKey, _ := generatePubKey()
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
+		Organization: testOrganization,
 		PublicKey:    pubKey,
 	}
 	verficationSrv := verifmocks.NewService(t)
@@ -112,7 +112,7 @@ func TestRegisterIssuer_Should_Register_Unverified_Issuer(t *testing.T) {
 	sut := node.NewIssuerService(issuerRepo, verficationSrv)
 
 	proof := &vctypes.Proof{
-		Type:       "JWT",
+		Type:       testProofTypeJWT,
 		ProofValue: "",
 	}
 
