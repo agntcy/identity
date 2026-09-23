@@ -2,7 +2,7 @@ module proto-enum-generator
 
 go 1.26.0
 
-toolchain go1.26.5
+toolchain go1.26.8
 
 require (
 	github.com/spf13/pflag v1.0.6

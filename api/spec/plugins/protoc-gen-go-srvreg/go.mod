@@ -2,7 +2,7 @@ module github.com/identity/protoc-gen-go-srvreg
 
 go 1.26.0
 
-toolchain go1.26.5
+toolchain go1.26.8
 
 require (
 	github.com/golang/glog v1.2.4

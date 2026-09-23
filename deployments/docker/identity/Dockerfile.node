@@ -1,4 +1,4 @@
-FROM golang:1.26.5-alpine AS builder
+FROM golang:1.26.8-alpine AS builder
 
 # Build the package
 WORKDIR /build
@@ -10,7 +10,7 @@ RUN apk update \
     &&  apk add ca-certificates wget \
     &&  update-ca-certificates
 
-FROM golang:1.26.5-alpine
+FROM golang:1.26.8-alpine
 
 # Create a group and user
 RUN addgroup -S web && adduser -u 1999 -S -G web web

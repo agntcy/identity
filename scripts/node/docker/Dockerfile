@@ -1,7 +1,7 @@
 # Copyright 2025 Copyright AGNTCY Contributors (https://github.com/agntcy)
 # SPDX-License-Identifier: Apache-2.0
 
-FROM golang:1.26.5-alpine3.23 AS builder
+FROM golang:1.26.8-alpine3.23 AS builder
 
 ARG BIN="/usr/local/bin"
 ARG BUF_VERSION="1.28.1"
