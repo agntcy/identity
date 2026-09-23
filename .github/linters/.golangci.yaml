@@ -3,7 +3,11 @@
 
 version: "2"
 run:
-  go: "1.26.0"
+  # Capped at 1.25, not the 1.26 toolchain: super-linter v8.1.0 bundles
+  # golangci-lint 2.4.0 built with go1.25, and it refuses to load a config
+  # targeting a newer language version than itself. Track the toolchain again
+  # once a dedicated golangci-lint job replaces super-linter's GO_MODULES.
+  go: "1.25"
   issues-exit-code: 1
 linters:
   default: none

@@ -42,7 +42,7 @@ jobs:
           GO_CONFIG_FILE: ".golangci.yaml"
           PROTOBUF_CONFIG_FILE: ".protolintrc.yml"
           TRIVY_CONFIG_FILE: ".trivy.yml"
-          FILTER_REGEX_EXCLUDE: "(.*/charts/.*)|(sdk/python/agntcy/.*)|(sdk/python/google/.*)|(sdk/python/openapiv3/.*)"
+          FILTER_REGEX_EXCLUDE: "(.*/charts/.*)|(sdk/python/agntcy/.*)|(sdk/python/google/.*)|(sdk/python/openapiv3/.*)|(.*/testdata/.*)"
           VALIDATE_GITHUB_ACTIONS_ZIZMOR: false
           VALIDATE_ALL_CODEBASE: false
           VALIDATE_MARKDOWN_PRETTIER: false
