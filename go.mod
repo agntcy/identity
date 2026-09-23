@@ -1,6 +1,8 @@
 module github.com/agntcy/identity
 
-go 1.24.1
+go 1.26.0
+
+toolchain go1.26.5
 
 require (
 	github.com/eko/gocache/lib/v4 v4.2.0

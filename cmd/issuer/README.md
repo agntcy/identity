@@ -7,7 +7,7 @@ It allows you to create and manage cryptographic keys, register as an issuer, ge
 
 To run or build the `CLI` locally, you need to have the following installed:
 
-- [Golang](https://go.dev/doc/install) 1.24 or later
+- [Golang](https://go.dev/doc/install) 1.26 or later
 
 ## Installation
 

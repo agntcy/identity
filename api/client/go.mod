@@ -1,6 +1,8 @@
 module github.com/agntcy/identity/api/client
 
-go 1.24.1
+go 1.26.0
+
+toolchain go1.26.5
 
 require (
 	github.com/go-openapi/errors v0.22.1

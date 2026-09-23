@@ -6,7 +6,7 @@
 
 `github.com/agntcy/identity/api/client` is the v1alpha1 Agntcy Identity Node SDK for the Go programming language that contains the different REST HTTP clients.
 
-The SDK requires a minimum version of `Go 1.24`.
+The SDK requires a minimum version of `Go 1.26`.
 
 ## Getting started
 
