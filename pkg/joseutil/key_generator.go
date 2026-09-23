@@ -19,6 +19,12 @@ const (
 	rsaBits384 = 3072
 	rsaBits512 = 4096
 	KeyTypeRSA = "RSA"
+
+	// The RSASSA-PKCS1-v1_5 signature algorithms supported for key generation,
+	// signing and verification.
+	AlgRS256 = "RS256"
+	AlgRS384 = "RS384"
+	AlgRS512 = "RS512"
 )
 
 func GenerateJWK(alg, use, id string) (*jwk.Jwk, error) {
@@ -27,7 +33,7 @@ func GenerateJWK(alg, use, id string) (*jwk.Jwk, error) {
 	}
 
 	switch alg {
-	case "RS256", "RS384", "RS512":
+	case AlgRS256, AlgRS384, AlgRS512:
 		return generateRSAJWK(alg, use, id)
 	default:
 		return nil, errors.New("unsupported algorithm")
@@ -36,9 +42,9 @@ func GenerateJWK(alg, use, id string) (*jwk.Jwk, error) {
 
 func generateRSAJWK(alg, use, id string) (*jwk.Jwk, error) {
 	bits := map[string]int{
-		"RS256": rsaBits256,
-		"RS384": rsaBits384,
-		"RS512": rsaBits512,
+		AlgRS256: rsaBits256,
+		AlgRS384: rsaBits384,
+		AlgRS512: rsaBits512,
 	}[alg]
 
 	privateKey, err := rsa.GenerateKey(rand.Reader, bits)

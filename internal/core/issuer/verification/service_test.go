@@ -21,6 +21,15 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
+// Fixture values shared across the verification service tests.
+const (
+	testOrganization     = "Some Org"
+	testSubject          = "test"
+	testProofTypeJWT     = "JWT"
+	testValidJWT         = "VALID_JWT"
+	testIssuerCommonName = "ISSUER"
+)
+
 func TestVerify_Should_Verify_Successfully(t *testing.T) {
 	t.Parallel()
 
@@ -32,13 +41,13 @@ func TestVerify_Should_Verify_Successfully(t *testing.T) {
 		"IdP issuer": {
 			issuer: &issuertypes.Issuer{
 				CommonName:   veriftesting.ValidProofIssuer,
-				Organization: "Some Org",
+				Organization: testOrganization,
 			},
 			jwt: &oidc.ParsedJWT{
 				Provider: oidc.DuoProviderName,
 				Claims: &oidc.Claims{
 					Issuer:  "http://" + veriftesting.ValidProofIssuer,
-					Subject: "test",
+					Subject: testSubject,
 				},
 				CommonName: veriftesting.ValidProofIssuer,
 			},
@@ -47,13 +56,13 @@ func TestVerify_Should_Verify_Successfully(t *testing.T) {
 		"Self issuer": {
 			issuer: &issuertypes.Issuer{
 				CommonName:   veriftesting.ValidProofIssuer,
-				Organization: "Some Org",
+				Organization: testOrganization,
 			},
 			jwt: &oidc.ParsedJWT{
 				Provider: oidc.SelfProviderName,
 				Claims: &oidc.Claims{
 					Issuer:  veriftesting.ValidProofIssuer,
-					Subject: "test",
+					Subject: testSubject,
 				},
 				CommonName: veriftesting.ValidProofIssuer,
 			},
@@ -73,7 +82,7 @@ func TestVerify_Should_Verify_Successfully(t *testing.T) {
 
 			sut := issuerverif.NewService(jwtParser, issuerRepo)
 
-			result, err := sut.Verify(t.Context(), tc.issuer, &vctypes.Proof{Type: "JWT"})
+			result, err := sut.Verify(t.Context(), tc.issuer, &vctypes.Proof{Type: testProofTypeJWT})
 
 			assert.NoError(t, err)
 			assert.Equal(t, tc.issuer, result.Issuer)
@@ -110,7 +119,7 @@ func TestVerify_Should_Fail(t *testing.T) {
 	t.Run("when proof JWT is invalid", func(t *testing.T) {
 		t.Parallel()
 
-		proof := &vctypes.Proof{Type: "JWT", ProofValue: "INVALID_JWT"}
+		proof := &vctypes.Proof{Type: testProofTypeJWT, ProofValue: "INVALID_JWT"}
 
 		jwtParser := verifmocks.NewParser(t)
 		jwtParser.EXPECT().ParseJwt(t.Context(), mock.Anything).Return(nil, errors.New("invalid jwt"))
@@ -126,7 +135,7 @@ func TestVerify_Should_Fail(t *testing.T) {
 	t.Run("when proof JWT verification fails", func(t *testing.T) {
 		t.Parallel()
 
-		proof := &vctypes.Proof{Type: "JWT", ProofValue: "VALID_JWT"}
+		proof := &vctypes.Proof{Type: testProofTypeJWT, ProofValue: testValidJWT}
 		jwt := &oidc.ParsedJWT{Provider: oidc.DuoProviderName}
 
 		jwtParser := verifmocks.NewParser(t)
@@ -146,13 +155,13 @@ func TestVerify_Should_Fail(t *testing.T) {
 
 		issuer := &issuertypes.Issuer{
 			CommonName:   veriftesting.ValidProofIssuer,
-			Organization: "Some Org",
+			Organization: testOrganization,
 		}
 		jwt := &oidc.ParsedJWT{
 			Provider: oidc.DuoProviderName,
 			Claims: &oidc.Claims{
 				Issuer:  "http://" + veriftesting.ValidProofIssuer,
-				Subject: "test",
+				Subject: testSubject,
 			},
 			CommonName: "INVALID ISSUER",
 		}
@@ -163,7 +172,7 @@ func TestVerify_Should_Fail(t *testing.T) {
 
 		sut := issuerverif.NewService(jwtParser, nil)
 
-		_, err := sut.Verify(t.Context(), issuer, &vctypes.Proof{Type: "JWT"})
+		_, err := sut.Verify(t.Context(), issuer, &vctypes.Proof{Type: testProofTypeJWT})
 
 		errtesting.AssertErrorInfoReason(t, err, errtypes.ERROR_REASON_INVALID_ISSUER)
 		assert.ErrorContains(t, err, "common name does not match issuer")
@@ -199,7 +208,7 @@ func TestVerifyExistingIssuer_Should_Fail(t *testing.T) {
 	t.Run("when jwt fails to parse", func(t *testing.T) {
 		t.Parallel()
 
-		proof := &vctypes.Proof{Type: "JWT", ProofValue: "INVALID_JWT"}
+		proof := &vctypes.Proof{Type: testProofTypeJWT, ProofValue: "INVALID_JWT"}
 
 		jwtParser := verifmocks.NewParser(t)
 		jwtParser.EXPECT().ParseJwt(t.Context(), mock.Anything).Return(nil, errors.New("invalid jwt"))
@@ -215,7 +224,7 @@ func TestVerifyExistingIssuer_Should_Fail(t *testing.T) {
 	t.Run("when issuer does not exist", func(t *testing.T) {
 		t.Parallel()
 
-		proof := &vctypes.Proof{Type: "JWT", ProofValue: "VALID_JWT"}
+		proof := &vctypes.Proof{Type: testProofTypeJWT, ProofValue: testValidJWT}
 		jwt := &oidc.ParsedJWT{Provider: oidc.DuoProviderName}
 
 		jwtParser := verifmocks.NewParser(t)
@@ -234,11 +243,11 @@ func TestVerifyExistingIssuer_Should_Fail(t *testing.T) {
 	t.Run("when jwt verification fails", func(t *testing.T) {
 		t.Parallel()
 
-		proof := &vctypes.Proof{Type: "JWT", ProofValue: "VALID_JWT"}
-		jwt := &oidc.ParsedJWT{Provider: oidc.DuoProviderName, CommonName: "ISSUER"}
+		proof := &vctypes.Proof{Type: testProofTypeJWT, ProofValue: testValidJWT}
+		jwt := &oidc.ParsedJWT{Provider: oidc.DuoProviderName, CommonName: testIssuerCommonName}
 		issuer := &issuertypes.Issuer{
-			CommonName:   "ISSUER",
-			Organization: "Some Org",
+			CommonName:   testIssuerCommonName,
+			Organization: testOrganization,
 		}
 
 		jwtParser := verifmocks.NewParser(t)
@@ -259,15 +268,15 @@ func TestVerifyExistingIssuer_Should_Fail(t *testing.T) {
 	t.Run("when the JWT is self issued and the issuer is IdP based", func(t *testing.T) {
 		t.Parallel()
 
-		proof := &vctypes.Proof{Type: "JWT", ProofValue: "VALID_JWT"}
+		proof := &vctypes.Proof{Type: testProofTypeJWT, ProofValue: testValidJWT}
 		jwt := &oidc.ParsedJWT{
 			Provider:   oidc.SelfProviderName,
-			CommonName: "ISSUER",
+			CommonName: testIssuerCommonName,
 			Claims:     &oidc.Claims{},
 		}
 		issuer := &issuertypes.Issuer{
-			CommonName:   "ISSUER",
-			Organization: "Some Org",
+			CommonName:   testIssuerCommonName,
+			Organization: testOrganization,
 			AuthType:     issuertypes.ISSUER_AUTH_TYPE_IDP,
 		}
 
@@ -289,15 +298,15 @@ func TestVerifyExistingIssuer_Should_Fail(t *testing.T) {
 func TestVerifyExistingIssuer_Should_Succeed(t *testing.T) {
 	t.Parallel()
 
-	proof := &vctypes.Proof{Type: "JWT", ProofValue: "VALID_JWT"}
+	proof := &vctypes.Proof{Type: testProofTypeJWT, ProofValue: testValidJWT}
 	jwt := &oidc.ParsedJWT{
 		Provider:   oidc.DuoProviderName,
-		CommonName: "ISSUER",
+		CommonName: testIssuerCommonName,
 		Claims:     &oidc.Claims{},
 	}
 	issuer := &issuertypes.Issuer{
-		CommonName:   "ISSUER",
-		Organization: "Some Org",
+		CommonName:   testIssuerCommonName,
+		Organization: testOrganization,
 		AuthType:     issuertypes.ISSUER_AUTH_TYPE_IDP,
 	}
 
