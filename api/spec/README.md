@@ -7,7 +7,7 @@ You can find the latest generated `API Spec` in the [Identity API Specs](https:/
 
 To generate the API specs, you need to have the following installed:
 
-- [Golang](https://go.dev/doc/install) 1.24 or later
+- [Golang](https://go.dev/doc/install) 1.26 or later
 - [Buf CLI](https://buf.build/docs/installation) 1.50 or later
 
 ## Development

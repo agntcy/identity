@@ -12,6 +12,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+// testFieldKey is the structured-log field asserted on throughout these tests.
+const testFieldKey = "key"
+
 func TestEnrichContext(t *testing.T) {
 	t.Parallel()
 
@@ -37,23 +40,23 @@ func TestEnrichContext(t *testing.T) {
 
 		ctx := context.Background()
 		ctx = EnrichContext(ctx, logrus.Fields{
-			"key": "old",
+			testFieldKey: "old",
 		})
 
 		fields := ctx.Value(contextLogFieldsKey{})
 
 		assert.Equal(t, logrus.Fields{
-			"key": "old",
+			testFieldKey: "old",
 		}, fields)
 
 		ctx = EnrichContext(ctx, logrus.Fields{
-			"key": "new",
+			testFieldKey: "new",
 		})
 
 		fields = ctx.Value(contextLogFieldsKey{})
 
 		assert.Equal(t, logrus.Fields{
-			"key": "new",
+			testFieldKey: "new",
 		}, fields)
 	})
 }

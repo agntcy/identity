@@ -49,7 +49,7 @@ func TestPublishVC(t *testing.T) {
 
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
+		Organization: testOrganization,
 	}
 
 	vcRepo := vcmocks.NewRepository(t)
@@ -68,7 +68,7 @@ func TestPublishVC(t *testing.T) {
 
 	envelope := generateValidVC(t, idRepo)
 
-	err := sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: "JWT"})
+	err := sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: testProofTypeJWT})
 
 	assert.NoError(t, err)
 }
@@ -96,7 +96,7 @@ func TestPublishVC_Should_Return_Invalid_Proof_Error(t *testing.T) {
 
 	sut := node.NewVerifiableCredentialService(idRepo, verifSrv, vcRepo)
 	envelope := generateValidVC(t, idRepo)
-	invalidProof := &vctypes.Proof{Type: "JWT"}
+	invalidProof := &vctypes.Proof{Type: testProofTypeJWT}
 
 	err := sut.Publish(t.Context(), envelope, invalidProof)
 
@@ -109,8 +109,8 @@ func TestGetWellKnown_Should_Return_Items(t *testing.T) {
 	resolverMetadatID := "my-id"
 	validVC := &vctypes.VerifiableCredential{
 		ID:                uuid.NewString(),
-		CredentialSubject: map[string]any{"id": resolverMetadatID},
-		Proof:             &vctypes.Proof{Type: "JWT", ProofValue: "PROOF"},
+		CredentialSubject: map[string]any{credentialSubjectIDKey: resolverMetadatID},
+		Proof:             &vctypes.Proof{Type: testProofTypeJWT, ProofValue: "PROOF"},
 	}
 	vcRepo := vcmocks.NewRepository(t)
 	vcRepo.EXPECT().
@@ -130,9 +130,9 @@ func TestVerifyVC_Should_Succeed(t *testing.T) {
 	t.Parallel()
 
 	credential := &vctypes.VerifiableCredential{
-		ID: "VC_ID",
+		ID: testVCID,
 		CredentialSubject: map[string]any{
-			"id": "DUO-" + verificationtesting.ValidProofSub,
+			credentialSubjectIDKey: "DUO-" + verificationtesting.ValidProofSub,
 		},
 	}
 	privKey, pubKey, _ := genKey()
@@ -140,7 +140,7 @@ func TestVerifyVC_Should_Succeed(t *testing.T) {
 	envelope, err := signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
 
-	_ = sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: "JWT"})
+	_ = sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: testProofTypeJWT})
 
 	result, err := sut.Verify(t.Context(), envelope)
 
@@ -153,9 +153,9 @@ func TestVerifyVC_Should_Fail_When_Revoked(t *testing.T) {
 	t.Parallel()
 
 	credential := &vctypes.VerifiableCredential{
-		ID: "VC_ID",
+		ID: testVCID,
 		CredentialSubject: map[string]any{
-			"id": "DUO-" + verificationtesting.ValidProofSub,
+			credentialSubjectIDKey: "DUO-" + verificationtesting.ValidProofSub,
 		},
 		Status: []*vctypes.CredentialStatus{
 			{
@@ -168,7 +168,7 @@ func TestVerifyVC_Should_Fail_When_Revoked(t *testing.T) {
 	envelope, err := signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
 
-	_ = sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: "JWT"})
+	_ = sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: testProofTypeJWT})
 
 	result, err := sut.Verify(t.Context(), envelope)
 
@@ -180,9 +180,9 @@ func TestRevokeVC_Should_Succeed(t *testing.T) {
 	t.Parallel()
 
 	credential := &vctypes.VerifiableCredential{
-		ID: "VC_ID",
+		ID: testVCID,
 		CredentialSubject: map[string]any{
-			"id": "DUO-" + verificationtesting.ValidProofSub,
+			credentialSubjectIDKey: "DUO-" + verificationtesting.ValidProofSub,
 		},
 	}
 
@@ -193,7 +193,7 @@ func TestRevokeVC_Should_Succeed(t *testing.T) {
 
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
+		Organization: testOrganization,
 	}
 
 	vcRepo := vcmocks.NewRepository(t)
@@ -215,7 +215,7 @@ func TestRevokeVC_Should_Succeed(t *testing.T) {
 	envelope, err := signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
 
-	_ = sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: "JWT"})
+	_ = sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: testProofTypeJWT})
 
 	// Revoke
 	credential.Status = []*vctypes.CredentialStatus{
@@ -226,7 +226,7 @@ func TestRevokeVC_Should_Succeed(t *testing.T) {
 	envelope, err = signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
 
-	err = sut.Revoke(t.Context(), envelope, &vctypes.Proof{Type: "JWT"})
+	err = sut.Revoke(t.Context(), envelope, &vctypes.Proof{Type: testProofTypeJWT})
 
 	assert.NoError(t, err)
 }
@@ -235,9 +235,9 @@ func TestRevokeVC_Should_Fail_When_VC_Not_Found(t *testing.T) {
 	t.Parallel()
 
 	credential := &vctypes.VerifiableCredential{
-		ID: "VC_ID",
+		ID: testVCID,
 		CredentialSubject: map[string]any{
-			"id": "DUO-" + verificationtesting.ValidProofSub,
+			credentialSubjectIDKey: "DUO-" + verificationtesting.ValidProofSub,
 		},
 	}
 
@@ -248,7 +248,7 @@ func TestRevokeVC_Should_Fail_When_VC_Not_Found(t *testing.T) {
 
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
+		Organization: testOrganization,
 	}
 
 	vcRepo := vcmocks.NewRepository(t)
@@ -268,7 +268,7 @@ func TestRevokeVC_Should_Fail_When_VC_Not_Found(t *testing.T) {
 	envelope, err := signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
 
-	_ = sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: "JWT"})
+	_ = sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: testProofTypeJWT})
 
 	// Revoke
 	credential.ID = "WRONG_ID"
@@ -281,7 +281,7 @@ func TestRevokeVC_Should_Fail_When_VC_Not_Found(t *testing.T) {
 	envelope, err = signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
 
-	err = sut.Revoke(t.Context(), envelope, &vctypes.Proof{Type: "JWT"})
+	err = sut.Revoke(t.Context(), envelope, &vctypes.Proof{Type: testProofTypeJWT})
 
 	assert.Error(t, err)
 	errtesting.AssertErrorInfoReason(t, err, errtypes.ERROR_REASON_INVALID_VERIFIABLE_CREDENTIAL)
@@ -291,9 +291,9 @@ func TestRevoke_Should_Fail_When_VC_Already_Revoked(t *testing.T) {
 	t.Parallel()
 
 	credential := &vctypes.VerifiableCredential{
-		ID: "VC_ID",
+		ID: testVCID,
 		CredentialSubject: map[string]any{
-			"id": "DUO-" + verificationtesting.ValidProofSub,
+			credentialSubjectIDKey: "DUO-" + verificationtesting.ValidProofSub,
 		},
 		Status: []*vctypes.CredentialStatus{
 			{
@@ -309,7 +309,7 @@ func TestRevoke_Should_Fail_When_VC_Already_Revoked(t *testing.T) {
 
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
+		Organization: testOrganization,
 	}
 
 	vcRepo := vcmocks.NewRepository(t)
@@ -330,7 +330,7 @@ func TestRevoke_Should_Fail_When_VC_Already_Revoked(t *testing.T) {
 	envelope, err := signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
 
-	_ = sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: "JWT"})
+	_ = sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: testProofTypeJWT})
 
 	// Revoke
 	credential.Status = []*vctypes.CredentialStatus{
@@ -341,7 +341,7 @@ func TestRevoke_Should_Fail_When_VC_Already_Revoked(t *testing.T) {
 	envelope, err = signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
 
-	err = sut.Revoke(t.Context(), envelope, &vctypes.Proof{Type: "JWT"})
+	err = sut.Revoke(t.Context(), envelope, &vctypes.Proof{Type: testProofTypeJWT})
 
 	assert.Error(t, err)
 	errtesting.AssertErrorInfoReason(t, err, errtypes.ERROR_REASON_VERIFIABLE_CREDENTIAL_REVOKED)
@@ -369,7 +369,7 @@ func TestRevokeVC_Should_Return_Invalid_Proof_Error(t *testing.T) {
 	verifSrv.EXPECT().VerifyExistingIssuer(t.Context(), mock.Anything).Return(nil, errors.New("failed"))
 	sut := node.NewVerifiableCredentialService(idRepo, verifSrv, vcRepo)
 	envelope := generateValidVC(t, idRepo)
-	invalidProof := &vctypes.Proof{Type: "JWT"}
+	invalidProof := &vctypes.Proof{Type: testProofTypeJWT}
 
 	err := sut.Revoke(t.Context(), envelope, invalidProof)
 
@@ -380,9 +380,9 @@ func TestRevoke_Should_Fail_When_Status_Does_Not_Have_Revocation(t *testing.T) {
 	t.Parallel()
 
 	credential := &vctypes.VerifiableCredential{
-		ID: "VC_ID",
+		ID: testVCID,
 		CredentialSubject: map[string]any{
-			"id": "DUO-" + verificationtesting.ValidProofSub,
+			credentialSubjectIDKey: "DUO-" + verificationtesting.ValidProofSub,
 		},
 	}
 	privKey, pubKey, _ := genKey()
@@ -391,7 +391,7 @@ func TestRevoke_Should_Fail_When_Status_Does_Not_Have_Revocation(t *testing.T) {
 	envelope, err := signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
 
-	_ = sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: "JWT"})
+	_ = sut.Publish(t.Context(), envelope, &vctypes.Proof{Type: testProofTypeJWT})
 
 	// Revoke
 	credential.Status = []*vctypes.CredentialStatus{}
@@ -399,7 +399,7 @@ func TestRevoke_Should_Fail_When_Status_Does_Not_Have_Revocation(t *testing.T) {
 	envelope, err = signVCWithJose(credential, privKey, pubKey.KID)
 	assert.NoError(t, err)
 
-	err = sut.Revoke(t.Context(), envelope, &vctypes.Proof{Type: "JWT"})
+	err = sut.Revoke(t.Context(), envelope, &vctypes.Proof{Type: testProofTypeJWT})
 
 	assert.Error(t, err)
 	errtesting.AssertErrorInfoReason(t, err, errtypes.ERROR_REASON_INVALID_VERIFIABLE_CREDENTIAL)
@@ -414,7 +414,7 @@ func setupVcServiceWithResolverMD(t *testing.T, pubKey *jwktype.Jwk) node.Verifi
 
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
+		Organization: testOrganization,
 	}
 
 	vcRepo := vcmocks.NewRepository(t)
@@ -452,9 +452,9 @@ func generateValidVC(t *testing.T, idRepo *idmocks.IdRepository) *vctypes.Envelo
 	t.Helper()
 
 	credential := &vctypes.VerifiableCredential{
-		ID: "VC_ID",
+		ID: testVCID,
 		CredentialSubject: map[string]any{
-			"id": "DUO-" + verificationtesting.ValidProofSub,
+			credentialSubjectIDKey: "DUO-" + verificationtesting.ValidProofSub,
 		},
 	}
 

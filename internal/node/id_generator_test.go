@@ -59,10 +59,10 @@ func TestGenerateFromProof_Should_Generate_Correct_Prefixes(t *testing.T) {
 		t.Run(tn, func(t *testing.T) {
 			t.Parallel()
 
-			proof := &vctypes.Proof{Type: "JWT", ProofValue: "VALID_JWT"}
+			proof := &vctypes.Proof{Type: testProofTypeJWT, ProofValue: "VALID_JWT"}
 			issuer := &issuertypes.Issuer{
 				CommonName:   "ISSUER",
-				Organization: "Some Org",
+				Organization: testOrganization,
 				AuthType:     issuertypes.ISSUER_AUTH_TYPE_IDP,
 			}
 			subject := uuid.NewString()
@@ -89,10 +89,10 @@ func TestGenerateFromProof_Should_Generate_Correct_Prefixes(t *testing.T) {
 func TestGenerateFromProof_Should_Fail_When_Provider_Is_Unknown(t *testing.T) {
 	t.Parallel()
 
-	proof := &vctypes.Proof{Type: "JWT", ProofValue: "VALID_JWT"}
+	proof := &vctypes.Proof{Type: testProofTypeJWT, ProofValue: "VALID_JWT"}
 	issuer := &issuertypes.Issuer{
 		CommonName:   "ISSUER",
-		Organization: "Some Org",
+		Organization: testOrganization,
 		AuthType:     issuertypes.ISSUER_AUTH_TYPE_IDP,
 	}
 	subject := uuid.NewString()

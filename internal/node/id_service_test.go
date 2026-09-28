@@ -34,14 +34,14 @@ func TestGenerateID_Should_Not_Return_Errors(t *testing.T) {
 
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
+		Organization: testOrganization,
 	}
 	idGen := nodemocks.NewIDGenerator(t)
 	idGen.EXPECT().GenerateFromProof(t.Context(), mock.Anything).Return(id, issuer, nil)
 
 	sut := node.NewIdService(idRepo, idGen)
 
-	md, err := sut.Generate(t.Context(), issuer, &vctypes.Proof{Type: "JWT"})
+	md, err := sut.Generate(t.Context(), issuer, &vctypes.Proof{Type: testProofTypeJWT})
 
 	assert.NoError(t, err)
 	assert.Equal(t, id, md.ID)
@@ -59,14 +59,14 @@ func TestGenerateID_Should_Not_Return_Error_With_Self_Provider(t *testing.T) {
 
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
+		Organization: testOrganization,
 	}
 	idGen := nodemocks.NewIDGenerator(t)
 	idGen.EXPECT().GenerateFromProof(t.Context(), mock.Anything).Return(id, issuer, nil)
 
 	sut := node.NewIdService(idRepo, idGen)
 
-	md, err := sut.Generate(t.Context(), issuer, &vctypes.Proof{Type: "JWT"})
+	md, err := sut.Generate(t.Context(), issuer, &vctypes.Proof{Type: testProofTypeJWT})
 
 	assert.NoError(t, err)
 	assert.Equal(t, id, md.ID)
@@ -80,7 +80,7 @@ func TestGenerateID_Should_Return_When_GenerateFromProof_Fails(t *testing.T) {
 
 	sut := node.NewIdService(nil, idGen)
 
-	_, err := sut.Generate(t.Context(), nil, &vctypes.Proof{Type: "JWT"})
+	_, err := sut.Generate(t.Context(), nil, &vctypes.Proof{Type: testProofTypeJWT})
 
 	assert.ErrorContains(t, err, "failed")
 }
@@ -90,7 +90,7 @@ func TestGenerateID_Should_Return_Invalid_Issuer_Error(t *testing.T) {
 
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
+		Organization: testOrganization,
 	}
 	idGen := nodemocks.NewIDGenerator(t)
 	idGen.EXPECT().GenerateFromProof(t.Context(), mock.Anything).Return("", issuer, nil)
@@ -103,7 +103,7 @@ func TestGenerateID_Should_Return_Invalid_Issuer_Error(t *testing.T) {
 		CommonName: "INVALID",
 	}
 
-	_, err := sut.Generate(t.Context(), invalidIssuer, &vctypes.Proof{Type: "JWT"})
+	_, err := sut.Generate(t.Context(), invalidIssuer, &vctypes.Proof{Type: testProofTypeJWT})
 
 	errtesting.AssertErrorInfoReason(t, err, errtypes.ERROR_REASON_INVALID_ISSUER)
 }
@@ -118,14 +118,14 @@ func TestGenerateID_Should_Return_ID_Already_Exists_Error(t *testing.T) {
 
 	issuer := &issuertypes.Issuer{
 		CommonName:   verificationtesting.ValidProofIssuer,
-		Organization: "Some Org",
+		Organization: testOrganization,
 	}
 	idGen := nodemocks.NewIDGenerator(t)
 	idGen.EXPECT().GenerateFromProof(t.Context(), mock.Anything).Return(existingMD.ID, issuer, nil)
 
 	sut := node.NewIdService(idRepo, idGen)
 
-	_, err := sut.Generate(t.Context(), nil, &vctypes.Proof{Type: "JWT"})
+	_, err := sut.Generate(t.Context(), nil, &vctypes.Proof{Type: testProofTypeJWT})
 
 	errtesting.AssertErrorInfoReason(t, err, errtypes.ERROR_REASON_ID_ALREADY_REGISTERED)
 }
