@@ -15,19 +15,19 @@ RUN curl -sSL \
     -o "${BIN}/buf" && \
     chmod +x "${BIN}/buf"
 
-RUN go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@latest
-RUN go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest
-RUN go install github.com/google/gnostic/cmd/protoc-gen-openapi@latest
-RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
-RUN go install github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc@latest
-RUN go install github.com/bufbuild/protoschema-plugins/cmd/protoc-gen-jsonschema@latest
+RUN go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-grpc-gateway@v2.30.0
+RUN go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.30.0
+RUN go install github.com/google/gnostic/cmd/protoc-gen-openapi@v0.7.1
+RUN go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.12
+RUN go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.6.2
+RUN go install github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc@v1.5.1
+RUN go install github.com/bufbuild/protoschema-plugins/cmd/protoc-gen-jsonschema@v0.6.0
 
 # Go to Protobuf
-RUN go install k8s.io/code-generator/cmd/go-to-protobuf@latest
-RUN go install k8s.io/code-generator/cmd/go-to-protobuf/protoc-gen-gogo@latest
-RUN go install golang.org/x/tools/cmd/goimports@latest
-RUN go get k8s.io/apimachinery
+RUN go install k8s.io/code-generator/cmd/go-to-protobuf@v0.37.1
+RUN go install k8s.io/code-generator/cmd/go-to-protobuf/protoc-gen-gogo@v0.37.1
+RUN go install golang.org/x/tools/cmd/goimports@v0.49.0
+RUN go get k8s.io/apimachinery@v0.37.1
 
 # Custom tools
 WORKDIR /identity/proto-enum-generator
