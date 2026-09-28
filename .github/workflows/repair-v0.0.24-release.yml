@@ -1,0 +1,66 @@
+# Copyright 2026 AGNTCY Contributors (https://github.com/agntcy)
+# SPDX-License-Identifier: Apache-2.0
+
+name: Repair v0.0.24 release signatures
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - name: Verify draft and download binaries
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=v0.0.24
+          test "$(gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json isDraft --jq .isDraft)" = true
+          mkdir -p "$RUNNER_TEMP/release"
+          gh release download "$tag" --repo "$GITHUB_REPOSITORY" --pattern 'identity_*' --dir "$RUNNER_TEMP/release"
+          cd "$RUNNER_TEMP/release"
+          sha256sum --check identity_0.0.24_checksums.txt
+
+      - name: Import release signing key
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          printf '%s\n' "$GPG_PRIVATE_KEY" | gpg --batch --import
+          fingerprint="$(gpg --batch --with-colons --fingerprint --list-secret-keys | awk -F: '$1 == "fpr" { print $10; exit }')"
+          test "$fingerprint" = 294149B55EFBE5DFF1E79AAEC6C6A1D111CA4342
+          gpg --batch --armor --export "$fingerprint" > "$RUNNER_TEMP/identity-release-signing-key.asc"
+          test -s "$RUNNER_TEMP/identity-release-signing-key.asc"
+
+      - name: Sign and verify each binary
+        env:
+          GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+        run: |
+          cd "$RUNNER_TEMP/release"
+          for binary in \
+            identity_darwin_amd64 \
+            identity_darwin_arm64 \
+            identity_linux_amd64 \
+            identity_linux_arm64 \
+            identity_windows_amd64.exe \
+            identity_windows_arm64.exe; do
+            test -s "$binary"
+            printf '%s\n' "$GPG_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+              --armor --detach-sign --output "$binary.sig" "$binary"
+            gpg --batch --verify "$binary.sig" "$binary"
+          done
+
+      - name: Upload signatures and publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          tag=v0.0.24
+          gh release upload "$tag" "$RUNNER_TEMP/release/"*.sig "$RUNNER_TEMP/identity-release-signing-key.asc" --repo "$GITHUB_REPOSITORY"
+          gh release delete-asset "$tag" identity.sig --yes --repo "$GITHUB_REPOSITORY"
+          gh release delete-asset "$tag" identity.exe.sig --yes --repo "$GITHUB_REPOSITORY"
+          gh release edit "$tag" --draft=false --repo "$GITHUB_REPOSITORY"
