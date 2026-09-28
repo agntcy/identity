@@ -96,9 +96,6 @@ jobs:
     runs-on: ubuntu-latest
     needs:
       - build-python-sdk
-    if: |
-      always() &&
-      (needs.build-python-sdk.result == 'skipped' || needs.build-python-sdk.result == 'success')
     environment: pypi
     permissions:
       # IMPORTANT: this permission is mandatory for Trusted Publishing
@@ -108,7 +105,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
-          merge-multiple: true
+          name: python-distributions
           path: ./dist
 
       - name: Show files

@@ -12,26 +12,11 @@ on:
 
 jobs:
   python-bindings-wheels:
-    runs-on: ${{ matrix.platform.runner }}
+    runs-on: ubuntu-22.04
     defaults:
       run:
         shell: bash
         working-directory: ./sdk/python
-    strategy:
-      matrix:
-        platform:
-          - runner: ubuntu-22.04
-            os: linux
-            target: x86_64
-          - runner: windows-latest
-            os: windows
-            target: x64
-          - runner: macos-13 # We use macos-13 as it is a x86_64 runner
-            os: macos
-            target: x86_64
-          - runner: macos-15
-            os: macos
-            target: aarch64
     steps:
       - name: Checkout code
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -52,5 +37,5 @@ jobs:
       - name: Upload wheel
         uses: actions/upload-artifact@4cec3d8aa04e39d1a68397de0c4cd6fb9dce8ec1 # v4.6.1
         with:
-          name: wheel-${{ matrix.platform.os }}-${{ matrix.platform.target }}
+          name: python-distributions
           path: ./sdk/python/dist
