@@ -7,7 +7,7 @@ version = "0.0.1"
 description = "Sample LangGraph Currency Agent with A2A Protocol"
 requires-python = ">=3.12"
 dependencies = [
-    "a2a-sdk==0.2.10",
+    "a2a-sdk==0.3.26",
     "httpx",
     "uvicorn",
     "click>=8.1.8",
@@ -17,6 +17,7 @@ dependencies = [
     "langchain-mcp-adapters>=0.2,<1",
     "langchain-ollama>=1,<2",
     "langgraph>=1,<2",
+    "protobuf>=5.29.6,<6",
 ]
 
 [tool.hatch.build.targets.wheel]
