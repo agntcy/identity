@@ -86,6 +86,10 @@ func parseAsVcWellKnownResponse(data []byte) ([]*vctypes.EnvelopedCredential, er
 	}
 
 	for _, vc := range vcs.Vcs {
+		if vc == nil || vc.EnvelopeType == nil {
+			return nil, fmt.Errorf("invalid badge: missing envelope type")
+		}
+
 		var envelopedCredential vctypes.EnvelopedCredential
 
 		envelopedCredential.Value = vc.Value
@@ -107,6 +111,12 @@ func parseAsVcList(data []byte) ([]*vctypes.EnvelopedCredential, error) {
 	err := json.Unmarshal(data, &vcs)
 	if err != nil {
 		return nil, fmt.Errorf("%w: %w", errUnsupportedFileFormat, err)
+	}
+
+	for _, vc := range vcs {
+		if vc == nil {
+			return nil, fmt.Errorf("invalid badge: null credential")
+		}
 	}
 
 	return vcs, nil
