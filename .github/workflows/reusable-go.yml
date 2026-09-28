@@ -72,3 +72,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.github-token }}
           GPG_PASSPHRASE: ${{ secrets.gpg-passphrase }}
+
+      - name: Publish release signing public key
+        env:
+          GH_TOKEN: ${{ secrets.github-token }}
+        run: |
+          signing_key="$(gpg --batch --list-secret-keys --with-colons | awk -F: '$1 == "fpr" { print $10; exit }')"
+          test -n "$signing_key"
+          gpg --batch --armor --export "$signing_key" > "$RUNNER_TEMP/identity-release-signing-key.asc"
+          test -s "$RUNNER_TEMP/identity-release-signing-key.asc"
+          gh release upload "$GITHUB_REF_NAME" "$RUNNER_TEMP/identity-release-signing-key.asc" --repo "$GITHUB_REPOSITORY"

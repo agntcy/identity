@@ -11,21 +11,14 @@ WORKDIR /identity
 COPY ./scripts/node/docker/entrypoint.sh .
 COPY ./scripts/node/docker/templates ./templates
 
-RUN apk update && apk --no-cache add curl=~8.14 git=~2.49
-
-RUN curl -sSL \
-    "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-$(uname -s)-$(uname -m)" \
-    -o "${BIN}/buf" && \
+RUN wget -qO "${BIN}/buf" \
+    "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-$(uname -s)-$(uname -m)" && \
     chmod +x "${BIN}/buf"
 
-RUN go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@latest && \
-    go install google.golang.org/protobuf/cmd/protoc-gen-go@latest && \
-    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest && \
-    mkdir go-swagger && \
-    git clone https://github.com/go-swagger/go-swagger "./go-swagger"
-
-WORKDIR /identity/go-swagger
-RUN go install ./cmd/swagger
+RUN go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.30.0 && \
+    go install google.golang.org/protobuf/cmd/protoc-gen-go@v1.36.12 && \
+    go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@v1.6.2 && \
+    go install github.com/go-swagger/go-swagger/cmd/swagger@v0.36.6
 
 WORKDIR /identity
 

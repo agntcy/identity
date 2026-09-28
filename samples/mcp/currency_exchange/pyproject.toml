@@ -10,7 +10,7 @@ dependencies = [
     "uvicorn",
     "fastapi[standard]",
     "httpx",
-    "mcp",
+    "mcp>=1,<2",
 ]
 
 [tool.hatch.build.targets.wheel]

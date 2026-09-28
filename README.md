@@ -2,6 +2,7 @@
 
 [![Lint](https://github.com/agntcy/identity/actions/workflows/lint.yml/badge.svg?branch=main)](https://github.com/marketplace/actions/super-linter)
 [![Contributor-Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-fbab2c.svg)](CODE_OF_CONDUCT.md)
+[![OpenSSF Best Practices](https://www.bestpractices.dev/projects/14991/badge)](https://www.bestpractices.dev/projects/14991)
 
 <p align="center">
   <a href="https://agntcy.org">

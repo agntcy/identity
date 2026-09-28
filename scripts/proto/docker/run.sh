@@ -67,7 +67,7 @@ packages=$(echo "$packages" | sed 's/\s$//' | sed 's/^\s//')
 
 cd "${Identity_ROOT}/local/github.com/agntcy/identity"
 
-go get github.com/gogo/protobuf/proto
+go get github.com/gogo/protobuf/proto@v1.3.2
 go mod vendor
 
 packages_comma_separated=$(echo "$packages" | tr ' ' ',')
