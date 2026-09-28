@@ -47,7 +47,9 @@ archives:
 
 binary_signs:
   - id: issuer-cli-sign
-    signature: "${artifact}.sig"
+    # Each release asset needs its own signature name. ${artifact} is only the
+    # binary basename (identity or identity.exe) for every target.
+    signature: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}{{ if eq .Os "windows" }}.exe{{ end }}.sig'
     cmd: gpg
     args:
       - "--batch"
