@@ -1,0 +1,14 @@
+# Copyright AGNTCY Contributors (https://github.com/agntcy)
+# SPDX-License-Identifier: Apache-2.0
+
+[[IgnoredVulns]]
+id = "GO-2026-5932"
+ignoreUntil = 2026-12-31
+reason = """
+This advisory affects only golang.org/x/crypto/openpgp and its subpackages.
+The root module requires x/crypto for other packages, but does not import
+OpenPGP, including transitively or through tests. Verified on 2026-09-28 with
+govulncheck -test and go list -deps -test. The required test workflow runs
+scripts/security/check-no-openpgp.sh for the host and all six CLI release
+targets to keep this exception valid. See SECURITY.md for revalidation.
+"""
