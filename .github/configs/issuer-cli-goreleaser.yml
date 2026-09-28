@@ -43,11 +43,11 @@ builds:
 
 archives:
   - name_template: '{{ .ProjectName }}_{{ .Os }}_{{ .Arch }}'
-    format: binary
+    formats: [binary]
 
 binary_signs:
   - id: issuer-cli-sign
-    signature: ${artifact}_{{ .Os }}_{{ .Arch }}_sig"
+    signature: "${artifact}.sig"
     cmd: gpg
     args:
       - "--batch"

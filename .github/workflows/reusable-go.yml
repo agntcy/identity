@@ -4,6 +4,9 @@
 ---
 name: Build and Push
 
+permissions:
+  contents: read
+
 on:
   workflow_call:
     inputs:
@@ -30,6 +33,8 @@ jobs:
   build-and-release:
     name: Build and Release Go
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       - name: Checkout code

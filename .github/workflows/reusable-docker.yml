@@ -4,6 +4,9 @@
 ---
 name: Build and Push Docker Images
 
+permissions:
+  contents: read
+
 on:
   workflow_call:
     inputs:
@@ -33,6 +36,9 @@ jobs:
   build-and-push:
     name: Build and Push Docker Images
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - name: Checkout code
