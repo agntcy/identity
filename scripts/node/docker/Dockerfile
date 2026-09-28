@@ -11,11 +11,8 @@ WORKDIR /identity
 COPY ./scripts/node/docker/entrypoint.sh .
 COPY ./scripts/node/docker/templates ./templates
 
-RUN apk update && apk --no-cache add curl
-
-RUN curl -sSL \
-    "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-$(uname -s)-$(uname -m)" \
-    -o "${BIN}/buf" && \
+RUN wget -qO "${BIN}/buf" \
+    "https://github.com/bufbuild/buf/releases/download/v${BUF_VERSION}/buf-$(uname -s)-$(uname -m)" && \
     chmod +x "${BIN}/buf"
 
 RUN go install github.com/grpc-ecosystem/grpc-gateway/v2/protoc-gen-openapiv2@v2.30.0 && \
