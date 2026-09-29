@@ -65,6 +65,8 @@ jobs:
     name: Build and Release Issuer Cli
     permissions:
       contents: write
+      id-token: write
+      attestations: write
     uses: ./.github/workflows/reusable-go.yml
     needs: [prepare-release]
     with:
