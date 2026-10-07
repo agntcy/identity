@@ -18,6 +18,7 @@ func FromResolverMetadata(src *idtypes.ResolverMetadata) *coreapi.ResolverMetada
 
 	return &coreapi.ResolverMetadata{
 		Id:              &src.ID,
+		Controller:      &src.Controller,
 		AssertionMethod: src.AssertionMethod,
 		VerificationMethod: convertutil.ConvertSlice(
 			src.VerificationMethod,
