@@ -210,7 +210,7 @@ func (s *server) result(kind, profile, subject, cid string, request any) (agntcy
 
 	return agntcy.VerificationResult{
 		Version: agntcy.ProtocolVersion, Kind: kind, Verifier: s.verifierID, Profile: profile,
-		PolicyVersion: agntcy.SubjectKeyPolicy, Subject: subject, RecordCID: cid,
+		PolicyVersion: agntcy.BadgePolicyVersion, Subject: subject, RecordCID: cid,
 		RequestDigest: agntcy.DigestRequest(data), CheckedAt: now.Format(time.RFC3339), ExpiresAt: now.Add(ttl).Format(time.RFC3339),
 	}, nil
 }
