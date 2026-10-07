@@ -30,7 +30,8 @@ func TestIdService_Generate(t *testing.T) {
 		t.Parallel()
 
 		resolverMetadata := &idtypes.ResolverMetadata{
-			ID: uuid.NewString(),
+			ID:         uuid.NewString(),
+			Controller: "issuer.example.test",
 		}
 
 		idSrv := nodemocks.NewIdService(t)
@@ -44,6 +45,7 @@ func TestIdService_Generate(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, resolverMetadata.ID, resp.ResolverMetadata.GetId())
+		assert.Equal(t, resolverMetadata.Controller, resp.ResolverMetadata.GetController())
 	})
 
 	t.Run("should propagate error when core service fails", func(t *testing.T) {
@@ -70,7 +72,7 @@ func TestIdService_Resolve(t *testing.T) {
 
 		idToResolve := uuid.NewString()
 
-		resolverMetadata := &idtypes.ResolverMetadata{ID: idToResolve}
+		resolverMetadata := &idtypes.ResolverMetadata{ID: idToResolve, Controller: "issuer.example.test"}
 
 		idSrv := nodemocks.NewIdService(t)
 		idSrv.EXPECT().
@@ -83,6 +85,7 @@ func TestIdService_Resolve(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Equal(t, resolverMetadata.ID, resp.ResolverMetadata.GetId())
+		assert.Equal(t, resolverMetadata.Controller, resp.ResolverMetadata.GetController())
 	})
 
 	t.Run("should return not found when ID is not resolved", func(t *testing.T) {
