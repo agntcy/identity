@@ -1,0 +1,36 @@
+# Copyright 2026 AGNTCY Contributors (https://github.com/agntcy)
+# SPDX-License-Identifier: Apache-2.0
+
+---
+name: Directory verifier
+on:
+  pull_request:
+    paths:
+      - 'integrations/directory-verifier/**'
+      - '.github/workflows/directory-verifier.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'integrations/directory-verifier/**'
+      - '.github/workflows/directory-verifier.yml'
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: integrations/directory-verifier
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-go@d35c59abb061a4a6fb18e82ac0862c26744d6ab5 # v5.5.0
+        with:
+          go-version-file: integrations/directory-verifier/go.mod
+          cache-dependency-path: integrations/directory-verifier/go.sum
+      - run: go test -race ./...
+      - run: go vet ./...
+      - uses: golangci/golangci-lint-action@ba0d7d2ec06a0ea1cb5fa41b2e4a3ab91d21278a # v9.3.0
+        with:
+          version: v2.13.2
+          working-directory: integrations/directory-verifier
+      - run: docker build -t directory-verifier:test .
